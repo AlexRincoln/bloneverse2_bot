@@ -12,7 +12,7 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.storage.memory import MemoryStorage
 
 # ─── CONFIG ───────────────────────────────────────────────────────────────────
-BOT_TOKEN = "ВСТАВЬ_СВОЙ_TOKEN_ЗДЕСЬ"
+BOT_TOKEN = "8862540650:AAG374nrX0fY7R4tt1DyfPSWCV2H9tps7oo"
 PROMO_CODE = "ПАПКА"
 PROMO_DISCOUNT = 90
 SUBSCRIPTION_PRICE = "499₽/мес"
