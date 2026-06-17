@@ -1,17 +1,23 @@
+import asyncio
+import sqlite3
 import logging
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import (
-    Application, CommandHandler, CallbackQueryHandler,
-    MessageHandler, filters, ContextTypes, ConversationHandler
+from aiogram import Bot, Dispatcher, F
+from aiogram.types import (
+    Message, CallbackQuery,
+    InlineKeyboardMarkup, InlineKeyboardButton
 )
+from aiogram.filters import CommandStart
+from aiogram.fsm.context import FSMContext
+from aiogram.fsm.state import State, StatesGroup
+from aiogram.fsm.storage.memory import MemoryStorage
 
 # ─── CONFIG ───────────────────────────────────────────────────────────────────
-BOT_TOKEN = "8862540650:AAG374nrX0fY7R4tt1DyfPSWCV2H9tps7oo"
+BOT_TOKEN = "ВСТАВЬ_СВОЙ_TOKEN_ЗДЕСЬ"
 PROMO_CODE = "ПАПКА"
 PROMO_DISCOUNT = 90
 SUBSCRIPTION_PRICE = "499₽/мес"
 GULYA_STICKER = "CAACAgIAAxkBAzmjtGoymMPPZt9rczW78Lv8ybc-Uz79AAIlHwACGSjRSnHdZJ9l8StePAQ"
-PAYMENT_LINK = "https://t.me/bloneverse_bot?start=pay"  # заменишь на реальную ссылку
+PAYMENT_LINK = "https://t.me/bloneverse_bot?start=pay"
 
 PRIVATE_CHANNELS = {
     "physics": "https://t.me/+XXXXXXXXXXXXXXXX",
@@ -24,7 +30,7 @@ DIRECTIONS = {
     "physics": {
         "name": "⚛️ Физика",
         "description": (
-            "⚛️ *Физика — BLONEVERSE*\n\n"
+            "<b>⚛️ Физика — BLONEVERSE</b>\n\n"
             "Здесь физику не заучивают — её видят.\n\n"
             "📌 Что тебя ждёт:\n"
             "• Качественные анимации явлений\n"
@@ -36,7 +42,7 @@ DIRECTIONS = {
     "self": {
         "name": "🧠 Саморазвитие",
         "description": (
-            "🧠 *Саморазвитие — BLONEVERSE*\n\n"
+            "<b>🧠 Саморазвитие — BLONEVERSE</b>\n\n"
             "Не мотивационный спам. Реальные инструменты.\n\n"
             "📌 Что тебя ждёт:\n"
             "• Методики продуктивности\n"
@@ -47,7 +53,7 @@ DIRECTIONS = {
     "fun": {
         "name": "😄 Развлечения",
         "description": (
-            "😄 *Развлечения — BLONEVERSE*\n\n"
+            "<b>😄 Развлечения — BLONEVERSE</b>\n\n"
             "Мемы. Юмор. Контент который попадает в точку.\n\n"
             "📌 Что тебя ждёт:\n"
             "• Мемы про науку и жизнь\n"
@@ -58,7 +64,7 @@ DIRECTIONS = {
     "science": {
         "name": "🔭 Научпоп",
         "description": (
-            "🔭 *Научпоп — BLONEVERSE*\n\n"
+            "<b>🔭 Научпоп — BLONEVERSE</b>\n\n"
             "Наука простым языком. Без воды.\n\n"
             "📌 Что тебя ждёт:\n"
             "• Интересные факты и открытия\n"
@@ -68,156 +74,174 @@ DIRECTIONS = {
     },
 }
 
-REGISTER = 1
-users = {}
+# ─── DATABASE ─────────────────────────────────────────────────────────────────
 
-logging.basicConfig(level=logging.INFO)
+def init_db():
+    conn = sqlite3.connect("bloneverse.db")
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS users (
+            user_id INTEGER PRIMARY KEY,
+            username TEXT NOT NULL,
+            subscribed INTEGER DEFAULT 0
+        )
+    """)
+    conn.commit()
+    conn.close()
+
+def get_user(user_id: int):
+    conn = sqlite3.connect("bloneverse.db")
+    row = conn.execute("SELECT * FROM users WHERE user_id = ?", (user_id,)).fetchone()
+    conn.close()
+    return row
+
+def add_user(user_id: int, username: str):
+    conn = sqlite3.connect("bloneverse.db")
+    conn.execute("INSERT OR IGNORE INTO users (user_id, username) VALUES (?, ?)", (user_id, username))
+    conn.commit()
+    conn.close()
+
+def set_subscribed(user_id: int):
+    conn = sqlite3.connect("bloneverse.db")
+    conn.execute("UPDATE users SET subscribed = 1 WHERE user_id = ?", (user_id,))
+    conn.commit()
+    conn.close()
+
+# ─── STATES ───────────────────────────────────────────────────────────────────
+
+class Register(StatesGroup):
+    waiting_username = State()
 
 # ─── KEYBOARDS ────────────────────────────────────────────────────────────────
 
-def showcase_keyboard():
-    """Витрина — кнопки направлений + оплата"""
-    return InlineKeyboardMarkup([
+def showcase_kb():
+    return InlineKeyboardMarkup(inline_keyboard=[
         [
-            InlineKeyboardButton("⚛️ Физика", callback_data="dir_physics"),
-            InlineKeyboardButton("🧠 Саморазвитие", callback_data="dir_self"),
+            InlineKeyboardButton(text="⚛️ Физика", callback_data="dir_physics"),
+            InlineKeyboardButton(text="🧠 Саморазвитие", callback_data="dir_self"),
         ],
         [
-            InlineKeyboardButton("😄 Развлечения", callback_data="dir_fun"),
-            InlineKeyboardButton("🔭 Научпоп", callback_data="dir_science"),
+            InlineKeyboardButton(text="😄 Развлечения", callback_data="dir_fun"),
+            InlineKeyboardButton(text="🔭 Научпоп", callback_data="dir_science"),
         ],
-        [InlineKeyboardButton(f"💳 Оплатить подписку — {SUBSCRIPTION_PRICE}", url=PAYMENT_LINK)],
+        [InlineKeyboardButton(text=f"💳 Оплатить подписку — {SUBSCRIPTION_PRICE}", url=PAYMENT_LINK)],
     ])
 
-def direction_keyboard():
-    """Внутри направления — оплата + назад"""
-    return InlineKeyboardMarkup([
-        [InlineKeyboardButton(f"💳 Оплатить подписку — {SUBSCRIPTION_PRICE}", url=PAYMENT_LINK)],
-        [InlineKeyboardButton("◀️ Назад", callback_data="showcase")],
+def direction_kb():
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text=f"💳 Оплатить подписку — {SUBSCRIPTION_PRICE}", url=PAYMENT_LINK)],
+        [InlineKeyboardButton(text="◀️ Назад", callback_data="showcase")],
     ])
 
-def after_payment_keyboard():
-    """После оплаты — ссылки на все приватные каналы"""
+def after_payment_kb():
     buttons = [
-        [InlineKeyboardButton(d["name"], url=PRIVATE_CHANNELS[k])]
+        [InlineKeyboardButton(text=d["name"], url=PRIVATE_CHANNELS[k])]
         for k, d in DIRECTIONS.items()
     ]
-    return InlineKeyboardMarkup(buttons)
+    return InlineKeyboardMarkup(inline_keyboard=buttons)
 
-# ─── HELPERS ──────────────────────────────────────────────────────────────────
+# ─── TEXTS ────────────────────────────────────────────────────────────────────
 
-async def send_with_sticker(update, context, text, reply_markup=None):
-    chat_id = update.effective_chat.id
-    await context.bot.send_sticker(chat_id=chat_id, sticker=GULYA_STICKER)
-    await context.bot.send_message(
-        chat_id=chat_id,
-        text=text,
-        parse_mode="Markdown",
-        reply_markup=reply_markup
-    )
-
-def showcase_text():
+def showcase_text(name: str = ""):
+    greeting = f"С возвращением, <b>{name}</b>! 👋\n\n" if name else ""
     return (
-        "📁 *BLONEVERSE — одна подписка, всё включено*\n\n"
-        "Нажми на раздел чтобы ознакомиться 👇\n\n"
-        "⚛️ Физика · 🧠 Саморазвитие\n"
-        "😄 Развлечения · 🔭 Научпоп\n\n"
-        f"💳 Цена: *{SUBSCRIPTION_PRICE}*\n"
-        f"🎁 Промокод `{PROMO_CODE}` — скидка {PROMO_DISCOUNT}%"
+        f"{greeting}"
+        f"<b>📁 BLONEVERSE — одна подписка, всё включено</b>\n\n"
+        f"Нажми на раздел чтобы ознакомиться 👇\n\n"
+        f"⚛️ Физика · 🧠 Саморазвитие\n"
+        f"😄 Развлечения · 🔭 Научпоп\n\n"
+        f"💳 Цена: <b>{SUBSCRIPTION_PRICE}</b>\n"
+        f"🎁 Промокод <code>{PROMO_CODE}</code> — скидка {PROMO_DISCOUNT}%"
     )
 
 # ─── HANDLERS ─────────────────────────────────────────────────────────────────
 
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_id = update.effective_user.id
+bot = Bot(token=BOT_TOKEN)
+dp = Dispatcher(storage=MemoryStorage())
 
-    if user_id in users:
-        name = users[user_id]["username"]
-        await send_with_sticker(
-            update, context,
-            f"С возвращением, *{name}*! 👋\n\n" + showcase_text(),
-            reply_markup=showcase_keyboard()
+@dp.message(CommandStart())
+async def cmd_start(message: Message, state: FSMContext):
+    user = get_user(message.from_user.id)
+
+    if user:
+        await message.answer_sticker(GULYA_STICKER)
+        await message.answer(
+            showcase_text(user[1]),
+            parse_mode="HTML",
+            reply_markup=showcase_kb()
         )
-        return ConversationHandler.END
+        return
 
-    await send_with_sticker(
-        update, context,
-        "📁 *Добро пожаловать в BLONEVERSE*\n\n"
+    await message.answer_sticker(GULYA_STICKER)
+    await message.answer(
+        "<b>📁 Добро пожаловать в BLONEVERSE</b>\n\n"
         "Одна вселенная. Разные миры.\n"
         "Наука. Саморазвитие. Развлечения.\n\n"
-        "Для начала — напиши свой никнейм:"
+        "Для начала — напиши свой никнейм:",
+        parse_mode="HTML"
     )
-    return REGISTER
+    await state.set_state(Register.waiting_username)
 
-async def register(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_id = update.effective_user.id
-    nickname = update.message.text.strip()
+@dp.message(Register.waiting_username)
+async def process_username(message: Message, state: FSMContext):
+    nickname = message.text.strip()
 
     if len(nickname) < 2:
-        await send_with_sticker(update, context, "Никнейм слишком короткий, попробуй ещё раз:")
-        return REGISTER
+        await message.answer("Никнейм слишком короткий, попробуй ещё раз:")
+        return
 
-    users[user_id] = {"username": nickname, "subscribed": False}
+    add_user(message.from_user.id, nickname)
+    await state.clear()
 
-    await send_with_sticker(
-        update, context,
-        f"✅ Готово, *{nickname}*!\n\n" + showcase_text(),
-        reply_markup=showcase_keyboard()
-    )
-    return ConversationHandler.END
-
-async def showcase_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Возврат на витрину"""
-    query = update.callback_query
-    await query.answer()
-    await query.edit_message_text(
-        showcase_text(),
-        parse_mode="Markdown",
-        reply_markup=showcase_keyboard()
+    await message.answer_sticker(GULYA_STICKER)
+    await message.answer(
+        f"✅ Готово, <b>{nickname}</b>!\n\n" + showcase_text(),
+        parse_mode="HTML",
+        reply_markup=showcase_kb()
     )
 
-async def direction_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Открывает описание направления"""
-    query = update.callback_query
-    await query.answer()
-    key = query.data.replace("dir_", "")
-    d = DIRECTIONS[key]
+@dp.callback_query(F.data == "showcase")
+async def cb_showcase(call: CallbackQuery):
+    user = get_user(call.from_user.id)
+    name = user[1] if user else ""
+    await call.message.edit_text(
+        showcase_text(name),
+        parse_mode="HTML",
+        reply_markup=showcase_kb()
+    )
+    await call.answer()
 
-    await query.edit_message_text(
+@dp.callback_query(F.data.startswith("dir_"))
+async def cb_direction(call: CallbackQuery):
+    key = call.data.replace("dir_", "")
+    d = DIRECTIONS.get(key)
+    if not d:
+        await call.answer("Раздел не найден")
+        return
+    await call.message.edit_text(
         d["description"],
-        parse_mode="Markdown",
-        reply_markup=direction_keyboard()
+        parse_mode="HTML",
+        reply_markup=direction_kb()
     )
+    await call.answer()
 
-async def access_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """После оплаты — даёт ссылки на все каналы"""
-    query = update.callback_query
-    await query.answer()
-    await query.edit_message_text(
-        "🎉 *Добро пожаловать в BLONEVERSE!*\n\n"
+@dp.callback_query(F.data == "access")
+async def cb_access(call: CallbackQuery):
+    set_subscribed(call.from_user.id)
+    await call.message.edit_text(
+        "🎉 <b>Добро пожаловать в BLONEVERSE!</b>\n\n"
         "Тебе открыты все разделы — выбирай 👇",
-        parse_mode="Markdown",
-        reply_markup=after_payment_keyboard()
+        parse_mode="HTML",
+        reply_markup=after_payment_kb()
     )
+    await call.answer()
 
 # ─── MAIN ─────────────────────────────────────────────────────────────────────
 
-def main():
-    app = Application.builder().token(BOT_TOKEN).build()
-
-    conv = ConversationHandler(
-        entry_points=[CommandHandler("start", start)],
-        states={REGISTER: [MessageHandler(filters.TEXT & ~filters.COMMAND, register)]},
-        fallbacks=[CommandHandler("start", start)],
-    )
-
-    app.add_handler(conv)
-    app.add_handler(CallbackQueryHandler(showcase_handler, pattern="^showcase$"))
-    app.add_handler(CallbackQueryHandler(direction_handler, pattern="^dir_"))
-    app.add_handler(CallbackQueryHandler(access_handler, pattern="^access$"))
-
+async def main():
+    init_db()
+    logging.basicConfig(level=logging.INFO)
     print("✅ Бот BLONEVERSE запущен...")
-    app.run_polling()
+    await dp.start_polling(bot)
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
