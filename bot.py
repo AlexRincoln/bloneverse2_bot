@@ -12,7 +12,7 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.storage.memory import MemoryStorage
 
 # ─── CONFIG ───────────────────────────────────────────────────────────────────
-BOT_TOKEN = "8862540650:AAG374nrX0fY7R4tt1DyfPSWCV2H9tps7oo"
+BOT_TOKEN = "8939981008:AAGODrnmp9qNNs3gPRxpkKl8IUlzX0Sk21o"
 PROMO_CODE = "ПАПКА"
 PROMO_DISCOUNT = 90
 SUBSCRIPTION_PRICE = "499₽/мес"
@@ -40,7 +40,7 @@ DIRECTIONS = {
         ),
     },
     "self": {
-        "name": "🧠 Саморазвитие",
+        "name": "⌨️ Саморазвитие",
         "description": (
             "<b>🦾 Саморазвитие — BLONEVERSE</b>\n\n"
             "Не мотивационный спам. Реальные инструменты.\n\n"
@@ -228,8 +228,8 @@ async def cb_direction(call: CallbackQuery):
 async def cb_access(call: CallbackQuery):
     set_subscribed(call.from_user.id)
     await call.message.edit_text(
-        "🎉 <b>Добро пожаловать в BLONEVERSE💾!</b>\n\n"
-        "Тебе открыты все разделы — выбирай 👇",
+        "🖥️ <b>Добро пожаловать в BLONEVERSE💾!</b>\n\n"
+        "Тебе открыты все разделы — выбирай 📼",
         parse_mode="HTML",
         reply_markup=after_payment_kb()
     )
@@ -240,7 +240,7 @@ async def cb_access(call: CallbackQuery):
 async def main():
     init_db()
     logging.basicConfig(level=logging.INFO)
-    print("✅ Бот BLONEVERSE запущен...")
+    print("📹 Бот BLONEVERSE запущен...")
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
