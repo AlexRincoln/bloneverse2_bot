@@ -28,48 +28,48 @@ PRIVATE_CHANNELS = {
 
 DIRECTIONS = {
     "physics": {
-        "name": "⚛️ Физика",
+        "name": "🔍 Физика",
         "description": (
-            "<b>⚛️ Физика — BLONEVERSE</b>\n\n"
+            "<b>🔍 Физика — BLONEVERSE</b>\n\n"
             "Здесь физику не заучивают — её видят.\n\n"
-            "📌 Что тебя ждёт:\n"
-            "• Качественные анимации явлений\n"
+            "🔊 Что тебя ждёт:\n"
+            "• 3 бесплатных занятия с БАТЕЙ физики🔊\n"
             "• Методички по ключевым темам\n"
             "• Объяснения через образы, а не формулы\n\n"
-            "🎓 Идеально если готовишься к ЕГЭ или поступаешь в универ."
+            "📼 Идеально если готовишься к ЕГЭ или поступаешь в универ."
         ),
     },
     "self": {
         "name": "🧠 Саморазвитие",
         "description": (
-            "<b>🧠 Саморазвитие — BLONEVERSE</b>\n\n"
+            "<b>🦾 Саморазвитие — BLONEVERSE</b>\n\n"
             "Не мотивационный спам. Реальные инструменты.\n\n"
-            "📌 Что тебя ждёт:\n"
+            "💻 Что тебя ждёт:\n"
             "• Методики продуктивности\n"
             "• Разборы привычек и мышления\n"
             "• Практики которые работают"
         ),
     },
     "fun": {
-        "name": "😄 Развлечения",
+        "name": "📺 Развлечения",
         "description": (
-            "<b>😄 Развлечения — BLONEVERSE</b>\n\n"
+            "<b>🩶 Развлечения — BLONEVERSE</b>\n\n"
             "Мемы. Юмор. Контент который попадает в точку.\n\n"
-            "📌 Что тебя ждёт:\n"
-            "• Мемы про науку и жизнь\n"
+            "🎧 Что тебя ждёт:\n"
+            "• Мемы\n"
             "• Короткий развлекательный контент\n"
-            "• Всё в фирменном стиле BLONEVERSE"
+            "• Всё в фирменном стиле BLONEVERSE💾"
         ),
     },
     "science": {
         "name": "🔭 Научпоп",
         "description": (
             "<b>🔭 Научпоп — BLONEVERSE</b>\n\n"
-            "Наука простым языком. Без воды.\n\n"
-            "📌 Что тебя ждёт:\n"
-            "• Интересные факты и открытия\n"
-            "• Разборы сложных тем доступно\n"
-            "• Контент который расширяет кругозор"
+            "Наука простым языком💻. Без воды.\n\n"
+            "🎧 Что тебя ждёт:\n"
+            "• Интересные факты и открытия💾\n"
+            "• Разборы сложных тем доступно📹\n"
+            "• Контент который расширяет кругозор⚓"
         ),
     },
 }
@@ -116,20 +116,20 @@ class Register(StatesGroup):
 def showcase_kb():
     return InlineKeyboardMarkup(inline_keyboard=[
         [
-            InlineKeyboardButton(text="⚛️ Физика", callback_data="dir_physics"),
-            InlineKeyboardButton(text="🧠 Саморазвитие", callback_data="dir_self"),
+            InlineKeyboardButton(text="🖨️ Физика", callback_data="dir_physics"),
+            InlineKeyboardButton(text="🩶 Саморазвитие", callback_data="dir_self"),
         ],
         [
-            InlineKeyboardButton(text="😄 Развлечения", callback_data="dir_fun"),
+            InlineKeyboardButton(text="🦾 Развлечения", callback_data="dir_fun"),
             InlineKeyboardButton(text="🔭 Научпоп", callback_data="dir_science"),
         ],
-        [InlineKeyboardButton(text=f"💳 Оплатить подписку — {SUBSCRIPTION_PRICE}", url=PAYMENT_LINK)],
+        [InlineKeyboardButton(text=f"🔍 Оплатить подписку — {SUBSCRIPTION_PRICE}", url=PAYMENT_LINK)],
     ])
 
 def direction_kb():
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text=f"💳 Оплатить подписку — {SUBSCRIPTION_PRICE}", url=PAYMENT_LINK)],
-        [InlineKeyboardButton(text="◀️ Назад", callback_data="showcase")],
+        [InlineKeyboardButton(text=f"🔊 Оплатить подписку — {SUBSCRIPTION_PRICE}", url=PAYMENT_LINK)],
+        [InlineKeyboardButton(text="🗝️ Назад", callback_data="showcase")],
     ])
 
 def after_payment_kb():
@@ -145,12 +145,12 @@ def showcase_text(name: str = ""):
     greeting = f"С возвращением, <b>{name}</b>! 👋\n\n" if name else ""
     return (
         f"{greeting}"
-        f"<b>📁 BLONEVERSE — одна подписка, всё включено</b>\n\n"
-        f"Нажми на раздел чтобы ознакомиться 👇\n\n"
-        f"⚛️ Физика · 🧠 Саморазвитие\n"
-        f"😄 Развлечения · 🔭 Научпоп\n\n"
-        f"💳 Цена: <b>{SUBSCRIPTION_PRICE}</b>\n"
-        f"🎁 Промокод <code>{PROMO_CODE}</code> — скидка {PROMO_DISCOUNT}%"
+        f"<b>💾 BLONEVERSE — одна подписка, всё включено</b>\n\n"
+        f"Нажми на раздел чтобы ознакомиться 🩶\n\n"
+        f"⌨️ Физика · 🖥️ Саморазвитие\n"
+        f"📼 Развлечения · 🔭 Научпоп\n\n"
+        f"⌨️ Цена: <b>{SUBSCRIPTION_PRICE}</b>\n"
+        f"🦾 Промокод <code>{PROMO_CODE}</code> — скидка {PROMO_DISCOUNT}%"
     )
 
 # ─── HANDLERS ─────────────────────────────────────────────────────────────────
@@ -173,10 +173,10 @@ async def cmd_start(message: Message, state: FSMContext):
 
     await message.answer_sticker(GULYA_STICKER)
     await message.answer(
-        "<b>📁 Добро пожаловать в BLONEVERSE</b>\n\n"
-        "Одна вселенная. Разные миры.\n"
-        "Наука. Саморазвитие. Развлечения.\n\n"
-        "Для начала — напиши свой никнейм:",
+        "<b>Добро пожаловать в BLONEVERSE💾</b>\n\n"
+        "Одна вселенная📱. \n"
+        "Наука📼. Саморазвитие📹. Развлечения🖥️.\n\n"
+        "Для начала — напиши свой никнейм📽️:",
         parse_mode="HTML"
     )
     await state.set_state(Register.waiting_username)
@@ -194,7 +194,7 @@ async def process_username(message: Message, state: FSMContext):
 
     await message.answer_sticker(GULYA_STICKER)
     await message.answer(
-        f"✅ Готово, <b>{nickname}</b>!\n\n" + showcase_text(),
+        f"💾Готово, <b>{nickname}</b>!\n\n" + showcase_text(),
         parse_mode="HTML",
         reply_markup=showcase_kb()
     )
@@ -228,7 +228,7 @@ async def cb_direction(call: CallbackQuery):
 async def cb_access(call: CallbackQuery):
     set_subscribed(call.from_user.id)
     await call.message.edit_text(
-        "🎉 <b>Добро пожаловать в BLONEVERSE!</b>\n\n"
+        "🎉 <b>Добро пожаловать в BLONEVERSE💾!</b>\n\n"
         "Тебе открыты все разделы — выбирай 👇",
         parse_mode="HTML",
         reply_markup=after_payment_kb()
