@@ -22,18 +22,19 @@ STICKER_LOBBY   = "CAACAgIAAxkBAzmjtGoymMPPZt9rczW78Lv8ybc-Uz79AAIlHwACGSjRSnHdZ
 
 PAYMENT_LINK = "https://t.me/bloneverse_bot?start=pay"
 
+# Заглушки ссылок — позже заменишь на реальные приватные каналы / плейлисты
 LINKS = {
-    "physics_tg":    "https://t.me/+XXXXXXXXXXXXXXXX",
-    "physics_yt":    "https://youtube.com/@bloneverse",
-    "chemistry_tg":  "https://t.me/+XXXXXXXXXXXXXXXX",
-    "chemistry_yt":  "https://youtube.com/@bloneverse",
-    "math_tg":       "https://t.me/+XXXXXXXXXXXXXXXX",
-    "math_yt":       "https://youtube.com/@bloneverse",
-    "fun_tg":        "https://t.me/+XXXXXXXXXXXXXXXX",
-    "fun_yt":        "https://youtube.com/@bloneverse",
+    "physics_tg":   "https://t.me/+XXXXXXXXXXXXXXXX",
+    "physics_yt":   "https://youtube.com/@bloneverse",
+    "math_tg":      "https://t.me/+XXXXXXXXXXXXXXXX",
+    "math_yt":      "https://youtube.com/@bloneverse",
+    "fun_tg":       "https://t.me/+XXXXXXXXXXXXXXXX",
+    "fun_yt":       "https://youtube.com/@bloneverse",
 }
 
-# ─── DATABASE ─────────────────────────────────────────────────────────────────
+# ════════════════════════════════════════════════════════════════════════════
+# DATABASE
+# ════════════════════════════════════════════════════════════════════════════
 
 def init_db():
     conn = sqlite3.connect("bloneverse.db")
@@ -65,19 +66,16 @@ def set_subscribed(user_id: int):
     conn.commit()
     conn.close()
 
-# ─── STATES ───────────────────────────────────────────────────────────────────
+# ════════════════════════════════════════════════════════════════════════════
+# STATES
+# ════════════════════════════════════════════════════════════════════════════
 
 class Register(StatesGroup):
     waiting_username = State()
 
-# ─── KEYBOARDS ────────────────────────────────────────────────────────────────
-
-def pay_back_kb(back_cb: str):
-    """Универсальная клавиатура: Оплатить + Назад"""
-    return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text=f"💳 Оплатить подписку — {SUBSCRIPTION_PRICE}", url=PAYMENT_LINK)],
-        [InlineKeyboardButton(text="🗝️ Назад", callback_data=back_cb)],
-    ])
+# ════════════════════════════════════════════════════════════════════════════
+# KEYBOARDS — главная / витрина
+# ════════════════════════════════════════════════════════════════════════════
 
 def showcase_kb():
     return InlineKeyboardMarkup(inline_keyboard=[
@@ -86,49 +84,52 @@ def showcase_kb():
             InlineKeyboardButton(text="📺 Развлечения",  callback_data="dir_fun"),
         ],
         [InlineKeyboardButton(text="Где Я🔊", callback_data="where_am_i")],
-        [InlineKeyboardButton(text=f"💳 Оплатить подписку — {SUBSCRIPTION_PRICE}", url=PAYMENT_LINK)],
+        [InlineKeyboardButton(text=f"💳 Оплатить подписку — {SUBSCRIPTION_PRICE}", url=None, callback_data="pay_intro")],
     ])
 
-# ── Саморазвитие: выбор предмета ──────────────────────────────────────────────
+def pay_back_kb(back_cb: str):
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text=f"💳 Оплатить подписку — {SUBSCRIPTION_PRICE}", callback_data="pay_intro")],
+        [InlineKeyboardButton(text="🗝️ Назад", callback_data=back_cb)],
+    ])
+
+# ── Саморазвитие (витрина, до оплаты) ─────────────────────────────────────────
+
 def self_subjects_kb():
     return InlineKeyboardMarkup(inline_keyboard=[
         [
-            InlineKeyboardButton(text="🔍 Физика",        callback_data="subj_physics"),
-            InlineKeyboardButton(text="🧪 Химия",         callback_data="subj_chemistry"),
+            InlineKeyboardButton(text="🔍 Физика",       callback_data="subj_physics"),
+            InlineKeyboardButton(text="🧪 Химия",        callback_data="subj_chemistry"),
         ],
         [
-            InlineKeyboardButton(text="📊 Математика",    callback_data="subj_math"),
-            InlineKeyboardButton(text="🛠️ В разработке",  callback_data="subj_wip"),
+            InlineKeyboardButton(text="📊 Математика",   callback_data="subj_math"),
+            InlineKeyboardButton(text="🛠️ В разработке", callback_data="subj_wip"),
         ],
         [InlineKeyboardButton(text="🗝️ Назад", callback_data="showcase")],
     ])
 
-# ── Внутри предмета: три раздела ──────────────────────────────────────────────
 def subject_menu_kb(subj: str):
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="🎓 2 занятия",  callback_data=f"detail_{subj}_lessons")],
         [InlineKeyboardButton(text="▶️ YouTube",    callback_data=f"detail_{subj}_yt")],
         [InlineKeyboardButton(text="📡 Telegram",   callback_data=f"detail_{subj}_tg")],
-        [InlineKeyboardButton(text=f"💳 Оплатить — {SUBSCRIPTION_PRICE}", url=PAYMENT_LINK)],
+        [InlineKeyboardButton(text=f"💳 Оплатить — {SUBSCRIPTION_PRICE}", callback_data="pay_intro")],
         [InlineKeyboardButton(text="🗝️ Назад", callback_data="dir_self")],
     ])
 
-# ── В разработке — просто назад ───────────────────────────────────────────────
 def wip_kb():
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="🗝️ Назад", callback_data="dir_self")],
     ])
 
-# ── Развлечения ───────────────────────────────────────────────────────────────
 def fun_menu_kb():
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="📡 Telegram", callback_data="fun_tg")],
         [InlineKeyboardButton(text="▶️ YouTube",  callback_data="fun_yt")],
-        [InlineKeyboardButton(text=f"💳 Оплатить — {SUBSCRIPTION_PRICE}", url=PAYMENT_LINK)],
+        [InlineKeyboardButton(text=f"💳 Оплатить — {SUBSCRIPTION_PRICE}", callback_data="pay_intro")],
         [InlineKeyboardButton(text="🗝️ Назад", callback_data="showcase")],
     ])
 
-# ── Где Я ─────────────────────────────────────────────────────────────────────
 def where_am_i_kb():
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="👤 Кто Я", callback_data="who_am_i")],
@@ -140,7 +141,94 @@ def who_am_i_kb():
         [InlineKeyboardButton(text="🗝️ Назад", callback_data="where_am_i")],
     ])
 
-# ─── ТЕКСТЫ ───────────────────────────────────────────────────────────────────
+# ════════════════════════════════════════════════════════════════════════════
+# KEYBOARDS — оплата (демо) и личный кабинет
+# ════════════════════════════════════════════════════════════════════════════
+
+def pay_intro_kb():
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text=f"💳 Оплатить — {SUBSCRIPTION_PRICE}", callback_data="do_pay")],
+        [InlineKeyboardButton(text="🗝️ Назад", callback_data="showcase")],
+    ])
+
+def cabinet_kb():
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [
+            InlineKeyboardButton(text="⌨️ Саморазвитие", callback_data="cab_self"),
+            InlineKeyboardButton(text="📺 Развлечения",  callback_data="cab_fun"),
+        ],
+    ])
+
+def cabinet_back_kb():
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="🗝️ Назад", callback_data="cabinet")],
+    ])
+
+# ── Кабинет → Саморазвитие ────────────────────────────────────────────────────
+
+def cab_self_kb():
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="📚 Предметные курсы", callback_data="cab_self_subjects")],
+        [InlineKeyboardButton(text="⚡ Продуктивность",   callback_data="cab_self_productivity")],
+        [InlineKeyboardButton(text="🗝️ Назад", callback_data="cabinet")],
+    ])
+
+def cab_subjects_kb():
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [
+            InlineKeyboardButton(text="🔍 Физика",     callback_data="cab_subj_physics"),
+            InlineKeyboardButton(text="📊 Математика", callback_data="cab_subj_math"),
+        ],
+        [InlineKeyboardButton(text="🗝️ Назад", callback_data="cab_self")],
+    ])
+
+def cab_subject_detail_kb(subj: str):
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="📡 Telegram", url=LINKS.get(f"{subj}_tg", "https://t.me/"))],
+        [InlineKeyboardButton(text="▶️ YouTube",  url=LINKS.get(f"{subj}_yt", "https://youtube.com/"))],
+        [InlineKeyboardButton(text="🗝️ Назад", callback_data="cab_self_subjects")],
+    ])
+
+def cab_productivity_kb():
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [
+            InlineKeyboardButton(text="🎯 Цели",       callback_data="cab_prod_goals"),
+            InlineKeyboardButton(text="🕳️ Хронофаги",  callback_data="cab_prod_chronophages"),
+        ],
+        [
+            InlineKeyboardButton(text="⏳ Время",       callback_data="cab_prod_time"),
+            InlineKeyboardButton(text="🔋 Энергия",     callback_data="cab_prod_energy"),
+        ],
+        [InlineKeyboardButton(text="🗝️ Назад", callback_data="cab_self")],
+    ])
+
+def cab_productivity_detail_kb(topic: str):
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="📡 Telegram", callback_data="empty_link")],
+        [InlineKeyboardButton(text="▶️ YouTube",  callback_data="empty_link")],
+        [InlineKeyboardButton(text="🗝️ Назад", callback_data="cab_self_productivity")],
+    ])
+
+# ── Кабинет → Развлечения ─────────────────────────────────────────────────────
+
+def cab_fun_kb():
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="🎞️ Мультфильмы", callback_data="cab_fun_cartoons")],
+        [InlineKeyboardButton(text="🎬 Ролики",       callback_data="cab_fun_clips")],
+        [InlineKeyboardButton(text="😂 Мемы",         callback_data="cab_fun_memes")],
+        [InlineKeyboardButton(text="🗝️ Назад", callback_data="cabinet")],
+    ])
+
+def cab_fun_detail_kb(topic: str):
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="📡 Telegram", url=LINKS.get("fun_tg", "https://t.me/"))],
+        [InlineKeyboardButton(text="▶️ YouTube",  url=LINKS.get("fun_yt", "https://youtube.com/"))],
+        [InlineKeyboardButton(text="🗝️ Назад", callback_data="cab_fun")],
+    ])
+
+# ════════════════════════════════════════════════════════════════════════════
+# ТЕКСТЫ — общая витрина (до оплаты)
+# ════════════════════════════════════════════════════════════════════════════
 
 def showcase_text(name: str = ""):
     greeting = f"С возвращением, <b>{name}</b>! 👋\n\n" if name else ""
@@ -163,7 +251,6 @@ SELF_INTRO_TEXT = (
     "👇 Выбери предмет:"
 )
 
-# ── Тексты меню предмета ──────────────────────────────────────────────────────
 SUBJECT_MENU_TEXTS = {
     "physics": (
         "<b>🔍 Физика — BLONEVERSE</b>\n\n"
@@ -191,101 +278,93 @@ SUBJECT_MENU_TEXTS = {
     ),
 }
 
-# ── Детальные тексты: Занятия ─────────────────────────────────────────────────
 LESSONS_TEXTS = {
     "physics": (
         "<b>🎓 2 занятия с преподавателем — Физика</b>\n\n"
         "После оплаты общей подписки тебе открываются <b>2 бесплатных занятия</b> "
         "с нашим преподавателем физики.\n\n"
-        "📌 Формат: живой разбор твоих вопросов, пробелов и тем\n"
-        "📌 Всё объясняется через образы и анимацию — без зубрёжки\n"
-        "📌 Занятия проходят онлайн, в удобное для тебя время\n\n"
-        "Все материалы к занятиям выполнены в <b>едином стиле BLONEVERSE</b> 💾"
+        "📌 Живой разбор твоих вопросов и пробелов\n"
+        "📌 Объяснения через образы и анимацию\n"
+        "📌 Онлайн, в удобное для тебя время\n\n"
+        "Все материалы — в едином стиле BLONEVERSE 💾"
     ),
     "chemistry": (
         "<b>🎓 2 занятия с преподавателем — Химия</b>\n\n"
         "После оплаты общей подписки тебе открываются <b>2 бесплатных занятия</b> "
         "с нашим преподавателем химии.\n\n"
-        "📌 Формат: живой разбор реакций, задач и твоих вопросов\n"
-        "📌 Объяснения через визуал — логика вместо формул наизусть\n"
-        "📌 Занятия проходят онлайн, в удобное для тебя время\n\n"
-        "Все материалы к занятиям выполнены в <b>едином стиле BLONEVERSE</b> 💾"
+        "📌 Живой разбор реакций и задач\n"
+        "📌 Объяснения через визуал\n"
+        "📌 Онлайн, в удобное для тебя время\n\n"
+        "Все материалы — в едином стиле BLONEVERSE 💾"
     ),
     "math": (
         "<b>🎓 2 занятия с преподавателем — Математика</b>\n\n"
         "После оплаты общей подписки тебе открываются <b>2 бесплатных занятия</b> "
         "с нашим преподавателем математики.\n\n"
-        "📌 Формат: разбор задач, пробелов и конкретных тем\n"
-        "📌 От простого к сложному — без воды и спешки\n"
-        "📌 Занятия проходят онлайн, в удобное для тебя время\n\n"
-        "Все материалы к занятиям выполнены в <b>едином стиле BLONEVERSE</b> 💾"
+        "📌 Разбор задач и пробелов\n"
+        "📌 От простого к сложному\n"
+        "📌 Онлайн, в удобное для тебя время\n\n"
+        "Все материалы — в едином стиле BLONEVERSE 💾"
     ),
 }
 
-# ── Детальные тексты: YouTube ─────────────────────────────────────────────────
 YT_TEXTS = {
     "physics": (
         "<b>▶️ YouTube — Физика</b>\n\n"
         "После оплаты подписки открывается доступ к <b>закрытым роликам на YouTube</b>.\n\n"
-        "🎬 Анимационные объяснения тем по физике\n"
-        "🎬 Каждый ролик — в отдельной папке по своей теме\n"
-        "🎬 Единый анимационный стиль BLONEVERSE — узнаваемо и структурно\n\n"
-        "📐 Никакой мешанины — только чёткая система знаний 💾"
+        "🎬 Анимационные объяснения тем\n"
+        "🎬 Каждый ролик — в отдельной папке по теме\n"
+        "🎬 Единый анимационный стиль BLONEVERSE\n\n"
+        "📐 Только чёткая система знаний 💾"
     ),
     "chemistry": (
         "<b>▶️ YouTube — Химия</b>\n\n"
         "После оплаты подписки открывается доступ к <b>закрытым роликам на YouTube</b>.\n\n"
-        "🎬 Анимационные объяснения тем по химии\n"
-        "🎬 Каждый ролик — в отдельной папке по своей теме\n"
-        "🎬 Единый анимационный стиль BLONEVERSE — узнаваемо и структурно\n\n"
-        "📐 Никакой мешанины — только чёткая система знаний 💾"
+        "🎬 Анимационные объяснения тем\n"
+        "🎬 Каждый ролик — в отдельной папке по теме\n"
+        "🎬 Единый анимационный стиль BLONEVERSE\n\n"
+        "📐 Только чёткая система знаний 💾"
     ),
     "math": (
         "<b>▶️ YouTube — Математика</b>\n\n"
         "После оплаты подписки открывается доступ к <b>закрытым роликам на YouTube</b>.\n\n"
-        "🎬 Анимационные объяснения тем по математике\n"
-        "🎬 Каждый ролик — в отдельной папке по своей теме\n"
-        "🎬 Единый анимационный стиль BLONEVERSE — узнаваемо и структурно\n\n"
-        "📐 Никакой мешанины — только чёткая система знаний 💾"
+        "🎬 Анимационные объяснения тем\n"
+        "🎬 Каждый ролик — в отдельной папке по теме\n"
+        "🎬 Единый анимационный стиль BLONEVERSE\n\n"
+        "📐 Только чёткая система знаний 💾"
     ),
 }
 
-# ── Детальные тексты: Telegram ────────────────────────────────────────────────
 TG_TEXTS = {
     "physics": (
         "<b>📡 Telegram — Физика</b>\n\n"
         "По общей подписке открывается <b>закрытый Telegram-канал по физике</b>.\n\n"
-        "📄 Статьи и объяснения тем простым языком\n"
-        "📁 Полезные методики, пособия и конспекты\n"
-        "📐 Все материалы в едином стиле BLONEVERSE\n\n"
-        "💾 Структура знаний — у тебя в кармане, в любое время."
+        "📄 Статьи и объяснения тем\n"
+        "📁 Методики, пособия, конспекты\n"
+        "📐 Всё в едином стиле BLONEVERSE\n\n"
+        "💾 Структура знаний — у тебя в кармане."
     ),
     "chemistry": (
         "<b>📡 Telegram — Химия</b>\n\n"
         "По общей подписке открывается <b>закрытый Telegram-канал по химии</b>.\n\n"
-        "📄 Статьи и объяснения тем простым языком\n"
-        "📁 Полезные методики, пособия и конспекты\n"
-        "📐 Все материалы в едином стиле BLONEVERSE\n\n"
-        "💾 Структура знаний — у тебя в кармане, в любое время."
+        "📄 Статьи и объяснения тем\n"
+        "📁 Методики, пособия, конспекты\n"
+        "📐 Всё в едином стиле BLONEVERSE\n\n"
+        "💾 Структура знаний — у тебя в кармане."
     ),
     "math": (
         "<b>📡 Telegram — Математика</b>\n\n"
         "По общей подписке открывается <b>закрытый Telegram-канал по математике</b>.\n\n"
-        "📄 Статьи и объяснения тем простым языком\n"
-        "📁 Полезные методики, пособия и конспекты\n"
-        "📐 Все материалы в едином стиле BLONEVERSE\n\n"
-        "💾 Структура знаний — у тебя в кармане, в любое время."
+        "📄 Статьи и объяснения тем\n"
+        "📁 Методики, пособия, конспекты\n"
+        "📐 Всё в едином стиле BLONEVERSE\n\n"
+        "💾 Структура знаний — у тебя в кармане."
     ),
-}
-
+    }
 WIP_TEXT = (
     "<b>🛠️ Скоро в BLONEVERSE</b>\n\n"
     "Мы активно работаем над новыми направлениями 💾\n\n"
-    "🔜 <b>Что готовится:</b>\n"
-    "• Новые предметы — история, биология, английский и другие\n"
-    "• Новые анимационные ролики в едином стиле\n"
-    "• Расширение платформы для всего мира 🌍\n\n"
-    "Все материалы, как всегда, будут в <b>едином фирменном стиле BLONEVERSE</b>.\n\n"
+    "🔜 Новые предметы, новые анимационные ролики, расширение платформы для всего мира 🌍\n\n"
     "⌨️ Следи за обновлениями — лучшее впереди 🚀"
 )
 
@@ -300,9 +379,9 @@ FUN_TEXT = (
 FUN_TG_TEXT = (
     "<b>📡 Telegram — Развлечения</b>\n\n"
     "По подписке открывается <b>закрытый Telegram-канал</b> с развлекательным контентом.\n\n"
-    "🎭 Мемы и юмор в фирменном стиле BLONEVERSE\n"
-    "💡 Советы, лайфхаки и интересные посты\n"
-    "🎨 Весь контент — в едином анимационном стиле компании\n\n"
+    "🎭 Мемы и юмор в фирменном стиле\n"
+    "💡 Советы и интересные посты\n"
+    "🎨 Единый анимационный стиль компании\n\n"
     "💾 Контент который попадает в точку — каждый день."
 )
 
@@ -310,7 +389,7 @@ FUN_YT_TEXT = (
     "<b>▶️ YouTube — Развлечения</b>\n\n"
     "По подписке открывается доступ к <b>закрытым роликам на YouTube</b>.\n\n"
     "🎬 Анимационные мультфильмы и короткометражки\n"
-    "🎬 Анимационные фильмы в едином стиле BLONEVERSE\n"
+    "🎬 Анимационные фильмы в едином стиле\n"
     "🎬 Каждый ролик — в своей папке, в своей теме\n\n"
     "📐 Единый стиль анимации — узнаваемо с первого кадра 💾"
 )
@@ -320,14 +399,12 @@ WHERE_AM_I_TEXT = (
     "Ты находишься в боте проекта <b>BLONEVERSE</b> — анимационной вселенной знаний и контента.\n\n"
     "🎬 <b>Идея компании:</b>\n"
     "Всё что мы делаем — в <b>едином анимационном стиле</b>. "
-    "Ролики, статьи, методички, обложки — единая визуальная система, "
-    "узнаваемая с первого взгляда.\n\n"
+    "Ролики, статьи, методички, обложки — единая визуальная система.\n\n"
     "🏗️ <b>Структура:</b>\n"
     "• ТГ-каналы по направлениям — учёба и развлечения\n"
-    "• YouTube-канал уже создан — все ролики в едином стиле анимации\n"
+    "• YouTube-канал уже создан\n"
     "• Единая платформа в разработке — для всего мира 🌍\n\n"
-    "🚀 <b>Цель</b> — глобальный проект, где любой человек в мире получает "
-    "качественный контент на одной платформе.\n\n"
+    "🚀 <b>Цель</b> — глобальный проект, доступный каждому в мире.\n\n"
     "📡 YouTube → собственная платформа. Все вперёд 💾\n\n"
     "👤 Хочешь узнать кто за этим стоит? Нажми <b>Кто Я</b> ниже."
 )
@@ -336,18 +413,84 @@ WHO_AM_I_TEXT = (
     "<b>👤 Кто Я — BLONEVERSE</b>\n\n"
     "Меня зовут создатель BLONEVERSE. Мне <b>20 лет</b>.\n\n"
     "Я строю проект с нуля — с идеи до глобальной платформы.\n\n"
-    "🎯 <b>Моя цель:</b>\n"
-    "Создать идеальную структуру обучения и развлечения — "
+    "🎯 <b>Моя цель:</b> создать идеальную структуру обучения и развлечения — "
     "где каждый ролик анимационный, каждый материал в своей папке, "
     "каждая тема в своём разделе.\n\n"
     "🎬 Каждый ролик — анимация. Каждая анимация — в едином стиле.\n"
     "📁 Каждая тема — в своей папке. Никакого хаоса.\n\n"
-    "🌍 Проект создан для всего мира — начиная с YouTube, "
-    "заканчивая собственной платформой.\n\n"
+    "🌍 Проект создан для всего мира — начиная с YouTube, заканчивая своей платформой.\n\n"
     "💾 Я верю что структура и визуал меняют то, как люди учатся и отдыхают."
 )
 
-# ─── HANDLERS ─────────────────────────────────────────────────────────────────
+# ════════════════════════════════════════════════════════════════════════════
+# ТЕКСТЫ — оплата (демо) и личный кабинет
+# ════════════════════════════════════════════════════════════════════════════
+
+PAY_INTRO_TEXT = (
+    "<b>💳 Подписка BLONEVERSE</b>\n\n"
+    "После оплаты тебя ждёт:\n\n"
+    "🔐 Доступ к <b>приватным Telegram-каналам</b>\n"
+    "▶️ Доступ к <b>закрытым видео на YouTube</b>\n"
+    "🎓 <b>2 созвона с наставником</b>\n\n"
+    f"💳 Стоимость: <b>{SUBSCRIPTION_PRICE}</b>\n"
+    f"🦾 Промокод <code>{PROMO_CODE}</code> — скидка {PROMO_DISCOUNT}%\n\n"
+    "👇 Нажми «Оплатить» чтобы продолжить"
+)
+
+def cabinet_text(name: str):
+    return (
+        f"<b>👤 Личный кабинет</b>\n\n"
+        f"Твой аккаунт: <b>{name}</b>\n"
+        f"Статус подписки: <b>Активна ✅</b>\n"
+        f"<i>(после окончания месяца нужно будет снова оплатить подписку)</i>\n\n"
+        f"👇 Выбери направление:"
+    )
+
+CAB_SELF_TEXT = (
+    "<b>⌨️ Саморазвитие</b>\n\n"
+    "Здесь будет структура по направлению: обучение.\n\n"
+    "👇 Выбери раздел:"
+)
+
+CAB_SUBJECTS_TEXT = (
+    "<b>📚 Предметные курсы</b>\n\n"
+    "Эти курсы содержат несколько направлений.\n\n"
+    "👇 Выбери предмет:"
+)
+
+CAB_SUBJECT_DETAIL_TEXTS = {
+    "physics": "<b>🔍 Физика</b>\n\nКраткий обзор материалов по физике — видео и канал ниже.",
+    "math":    "<b>📊 Математика</b>\n\nКраткий обзор материалов по математике — видео и канал ниже.",
+}
+
+CAB_PRODUCTIVITY_TEXT = (
+    "<b>⚡ Продуктивность</b>\n\n"
+    "Курс затрагивает темы:\n\n"
+    "👇 Выбери тему:"
+)
+
+CAB_PRODUCTIVITY_DETAIL_TEXTS = {
+    "goals":          "<b>🎯 Цели</b>\n\nКак ставить цели и доходить до результата — кратко о теме.",
+    "chronophages":   "<b>🕳️ Хронофаги</b>\n\nЧто крадёт твоё время и как это остановить — кратко о теме.",
+    "time":           "<b>⏳ Время</b>\n\nКак управлять временем эффективно — кратко о теме.",
+    "energy":         "<b>🔋 Энергия</b>\n\nКак управлять своей энергией и не выгорать — кратко о теме.",
+}
+
+CAB_FUN_TEXT = (
+    "<b>📺 Развлечения</b>\n\n"
+    "Здесь будет структура с анимационным контентом.\n\n"
+    "👇 Выбери раздел:"
+)
+
+CAB_FUN_DETAIL_TEXTS = {
+    "cartoons": "<b>🎞️ Мультфильмы</b>\n\nАнимационные мультфильмы в едином стиле BLONEVERSE — кратко о разделе.",
+    "clips":    "<b>🎬 Ролики</b>\n\nКороткие анимационные ролики — кратко о разделе.",
+    "memes":    "<b>😂 Мемы</b>\n\nМемы и юмор в фирменном стиле — кратко о разделе.",
+}
+
+# ════════════════════════════════════════════════════════════════════════════
+# HANDLERS
+# ════════════════════════════════════════════════════════════════════════════
 
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher(storage=MemoryStorage())
@@ -391,7 +534,7 @@ async def cb_showcase(call: CallbackQuery):
     await call.message.edit_text(showcase_text(name), parse_mode="HTML", reply_markup=showcase_kb())
     await call.answer()
 
-# ── Саморазвитие ──────────────────────────────────────────────────────────────
+# ── Саморазвитие (витрина, до оплаты) ─────────────────────────────────────────
 
 @dp.callback_query(F.data == "dir_self")
 async def cb_dir_self(call: CallbackQuery):
@@ -414,13 +557,11 @@ async def cb_subject(call: CallbackQuery):
 
 @dp.callback_query(F.data.startswith("detail_"))
 async def cb_detail(call: CallbackQuery):
-    # detail_{subj}_{type}  e.g. detail_physics_lessons
-    parts = call.data.split("_", 2)   # ['detail', 'physics', 'lessons']
+    parts = call.data.split("_", 2)
     if len(parts) != 3:
         await call.answer("Ошибка")
         return
     _, subj, kind = parts
-
     if kind == "lessons":
         text = LESSONS_TEXTS.get(subj, "Информация скоро появится.")
     elif kind == "yt":
@@ -430,15 +571,10 @@ async def cb_detail(call: CallbackQuery):
     else:
         await call.answer("Неизвестный раздел")
         return
-
-    await call.message.edit_text(
-        text,
-        parse_mode="HTML",
-        reply_markup=pay_back_kb(f"subj_{subj}")
-    )
+    await call.message.edit_text(text, parse_mode="HTML", reply_markup=pay_back_kb(f"subj_{subj}"))
     await call.answer()
 
-# ── Развлечения ───────────────────────────────────────────────────────────────
+# ── Развлечения (витрина, до оплаты) ──────────────────────────────────────────
 
 @dp.callback_query(F.data == "dir_fun")
 async def cb_dir_fun(call: CallbackQuery):
@@ -467,26 +603,98 @@ async def cb_who_am_i(call: CallbackQuery):
     await call.message.edit_text(WHO_AM_I_TEXT, parse_mode="HTML", reply_markup=who_am_i_kb())
     await call.answer()
 
-# ── После оплаты ──────────────────────────────────────────────────────────────
+# ── Оплата (демо) ──────────────────────────────────────────────────────────────
 
-@dp.callback_query(F.data == "access")
-async def cb_access(call: CallbackQuery):
-    set_subscribed(call.from_user.id)
-    kb = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="🔍 Физика",      url=LINKS["physics_tg"])],
-        [InlineKeyboardButton(text="🧪 Химия",       url=LINKS["chemistry_tg"])],
-        [InlineKeyboardButton(text="📊 Математика",  url=LINKS["math_tg"])],
-        [InlineKeyboardButton(text="📺 Развлечения", url=LINKS["fun_tg"])],
-    ])
-    await call.message.edit_text(
-        "🖥️ <b>Добро пожаловать в BLONEVERSE💾!</b>\n\n"
-        "Тебе открыты все разделы — выбирай 📼",
-        parse_mode="HTML",
-        reply_markup=kb
-    )
+@dp.callback_query(F.data == "pay_intro")
+async def cb_pay_intro(call: CallbackQuery):
+    await call.message.edit_text(PAY_INTRO_TEXT, parse_mode="HTML", reply_markup=pay_intro_kb())
     await call.answer()
 
-# ─── MAIN ─────────────────────────────────────────────────────────────────────
+@dp.callback_query(F.data == "do_pay")
+async def cb_do_pay(call: CallbackQuery):
+    # ──────────────────────────────────────────────────────────────────────
+    # TODO: здесь будет интеграция реальной платёжной системы
+    # (например ЮKassa / Telegram Payments / CryptoBot).
+    # Сейчас это ДЕМО-режим: оплата считается успешной сразу,
+    # без проверки реального платежа.
+    #
+    # Когда подключишь платёжку:
+    # 1. Создай инвойс / ссылку на оплату здесь
+    # 2. Дождись вебхука/колбэка об успешной оплате
+    # 3. Только после этого вызывай set_subscribed() и открывай кабинет
+    # ──────────────────────────────────────────────────────────────────────
+    set_subscribed(call.from_user.id)
+    user = get_user(call.from_user.id)
+    name = user[1] if user else call.from_user.full_name
+    await call.message.edit_text(
+        "✅ <b>Оплата прошла успешно! (демо-режим)</b>\n\n"
+        "Добро пожаловать в личный кабинет 💾",
+        parse_mode="HTML"
+    )
+    await call.message.answer(cabinet_text(name), parse_mode="HTML", reply_markup=cabinet_kb())
+    await call.answer()
+
+@dp.callback_query(F.data == "empty_link")
+async def cb_empty_link(call: CallbackQuery):
+    await call.answer("Скоро здесь появится ссылка 🚧", show_alert=True)
+
+# ── Личный кабинет ─────────────────────────────────────────────────────────────
+
+@dp.callback_query(F.data == "cabinet")
+async def cb_cabinet(call: CallbackQuery):
+    user = get_user(call.from_user.id)
+    name = user[1] if user else call.from_user.full_name
+    await call.message.edit_text(cabinet_text(name), parse_mode="HTML", reply_markup=cabinet_kb())
+    await call.answer()
+
+# ── Кабинет → Саморазвитие ────────────────────────────────────────────────────
+
+@dp.callback_query(F.data == "cab_self")
+async def cb_cab_self(call: CallbackQuery):
+    await call.message.edit_text(CAB_SELF_TEXT, parse_mode="HTML", reply_markup=cab_self_kb())
+    await call.answer()
+
+@dp.callback_query(F.data == "cab_self_subjects")
+async def cb_cab_self_subjects(call: CallbackQuery):
+    await call.message.edit_text(CAB_SUBJECTS_TEXT, parse_mode="HTML", reply_markup=cab_subjects_kb())
+    await call.answer()
+
+@dp.callback_query(F.data.startswith("cab_subj_"))
+async def cb_cab_subject_detail(call: CallbackQuery):
+    key = call.data.replace("cab_subj_", "")
+    text = CAB_SUBJECT_DETAIL_TEXTS.get(key, "Информация скоро появится.")
+    await call.message.edit_text(text, parse_mode="HTML", reply_markup=cab_subject_detail_kb(key))
+    await call.answer()
+
+@dp.callback_query(F.data == "cab_self_productivity")
+async def cb_cab_self_productivity(call: CallbackQuery):
+    await call.message.edit_text(CAB_PRODUCTIVITY_TEXT, parse_mode="HTML", reply_markup=cab_productivity_kb())
+    await call.answer()
+
+@dp.callback_query(F.data.startswith("cab_prod_"))
+async def cb_cab_productivity_detail(call: CallbackQuery):
+    key = call.data.replace("cab_prod_", "")
+    text = CAB_PRODUCTIVITY_DETAIL_TEXTS.get(key, "Информация скоро появится.")
+    await call.message.edit_text(text, parse_mode="HTML", reply_markup=cab_productivity_detail_kb(key))
+    await call.answer()
+
+# ── Кабинет → Развлечения ─────────────────────────────────────────────────────
+
+@dp.callback_query(F.data == "cab_fun")
+async def cb_cab_fun(call: CallbackQuery):
+    await call.message.edit_text(CAB_FUN_TEXT, parse_mode="HTML", reply_markup=cab_fun_kb())
+    await call.answer()
+
+@dp.callback_query(F.data.startswith("cab_fun_"))
+async def cb_cab_fun_detail(call: CallbackQuery):
+    key = call.data.replace("cab_fun_", "")
+    text = CAB_FUN_DETAIL_TEXTS.get(key, "Информация скоро появится.")
+    await call.message.edit_text(text, parse_mode="HTML", reply_markup=cab_fun_detail_kb(key))
+    await call.answer()
+
+# ════════════════════════════════════════════════════════════════════════════
+# MAIN
+# ════════════════════════════════════════════════════════════════════════════
 
 async def main():
     init_db()
