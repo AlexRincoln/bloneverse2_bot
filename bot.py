@@ -16,8 +16,8 @@ PROMO_CODE = "ПАПКА"
 PROMO_DISCOUNT = 90
 SUBSCRIPTION_PRICE = "10 дол/мес"
 
-STICKER_WELCOME = "CAACAgIAAxkBAzmjtGoymMPPZt9rczW78Lv8ybc-Uz79AAIlHwACGSjRSnHdZJ9l8StePAQ"
-STICKER_LOBBY   = "CAACAgIAAxkBAzmjtGoymMPPZt9rczW78Lv8ybc-Uz79AAIlHwACGSjRSnHdZJ9l8StePAQ"
+STICKER_WELCOME = "CAACAgIAAxkBAAERcLhqOs0ZLhHJ4YZ0WltLvQRwUvOGtwACEwEAAlKJkSOAar-n7Nv_PDwE"
+STICKER_LOBBY   = "CAACAgIAAxkBAAERcLpqOs1Vd_ELjYXLWxEzqjgPlUqFDQACEAEAAlKJkSPESPH6zBwG8zwE"
 
 FREE_LIMIT_TEXT = "\n\n*Учтите, здесь собрана малая часть всего контента\. Чтобы получить доступ ко всему контенту — оплатите подписку\.*"
 
