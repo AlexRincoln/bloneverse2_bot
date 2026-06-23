@@ -16,8 +16,8 @@ PROMO_CODE = "ПАПКА"
 PROMO_DISCOUNT = 90
 SUBSCRIPTION_PRICE = "10 дол/мес"
 
-STICKER_WELCOME = "CAACAgIAAxkBAAERcLhqOs0ZLhHJ4YZ0WltLvQRwUvOGtwACEwEAAlKJkSOAar-n7Nv_PDwE"
-STICKER_LOBBY   = "CAACAgIAAxkBAAERcLpqOs1Vd_ELjYXLWxEzqjgPlUqFDQACEAEAAlKJkSPESPH6zBwG8zwE"
+STICKER_WELCOME = "CAACAgIAAxkBAzmjtGoymMPPZt9rczW78Lv8ybc-Uz79AAIlHwACGSjRSnHdZJ9l8StePAQ"
+STICKER_LOBBY   = "CAACAgIAAxkBAzmjtGoymMPPZt9rczW78Lv8ybc-Uz79AAIlHwACGSjRSnHdZJ9l8StePAQ"
 
 FREE_LIMIT_TEXT = "\n\n*Учтите, здесь собрана малая часть всего контента\. Чтобы получить доступ ко всему контенту — оплатите подписку\.*"
 
@@ -131,13 +131,26 @@ def productivity_kb(is_paid: bool):
     prefix = "paid_" if is_paid else "free_"
     kb = [
         [InlineKeyboardButton(text="БИЗНЕС", callback_data=f"{prefix}biz")],
-        [InlineKeyboardButton(text="УЧЕБА", callback_data=f"{prefix}study")]
+        [InlineKeyboardButton(text="УЧЕБА", callback_data=f"{prefix}edu")]  # Направляем сразу в edu (предметы)
     ]
     back_target = f"{prefix}self_dev"
     kb.append([InlineKeyboardButton(text="НАЗАД", callback_data=back_target)])
     if not is_paid:
         kb.append([InlineKeyboardButton(text="ОПЛАТИТЬ ПОДПИСКУ", callback_data="mode_paid")])
     return InlineKeyboardMarkup(inline_keyboard=kb)
+
+def study_kb(is_paid: bool):
+    prefix = "paid_" if is_paid else "free_"
+    kb = [
+        [InlineKeyboardButton(text="ФИЗИКА", callback_data=f"{prefix}physics")],
+        [InlineKeyboardButton(text="МАТЕМАТИКА", callback_data=f"{prefix}math")]
+    ]
+    back_target = f"{prefix}prod"
+    kb.append([InlineKeyboardButton(text="НАЗАД", callback_data=back_target)])
+    if not is_paid:
+        kb.append([InlineKeyboardButton(text="ОПЛАТИТЬ ПОДПИСКУ", callback_data="mode_paid")])
+    return InlineKeyboardMarkup(inline_keyboard=kb)
+
 
 # ─── КЛАВИАТУРЫ С ССЫЛКАМИ НА РОЛИКИ (СПОСОБ 1) ──────────────────────────────
 
@@ -281,7 +294,7 @@ async def free_biz_handler(callback: CallbackQuery):
 async def free_edu_handler(callback: CallbackQuery):
     await callback.message.edit_text(
         "В этом разделе у нас есть несколько направлений\. Здесь мы подготовим тебя к экзаменам\. "
-        "Смотри все по порядку\. Скачивай полезные материалы\." + FREE_LIMIT_TEXT,
+        "Выбирай интересующий предмет\. Скачивай полезные материалы\." + FREE_LIMIT_TEXT,
         reply_markup=study_kb(is_paid=False)
     )
 
@@ -396,7 +409,7 @@ async def paid_biz_handler(callback: CallbackQuery):
 async def paid_edu_handler(callback: CallbackQuery):
     await callback.message.edit_text(
         "В этом разделе у нас есть несколько направлений\. Здесь мы подготовим тебя к экзаменам\. "
-        "Смотри все по порядку\. Скачивай полезные материалы\.",
+        "Выбирай интересующий предмет\. Скачивай полезные материалы\.",
         reply_markup=study_kb(is_paid=True)
     )
 
