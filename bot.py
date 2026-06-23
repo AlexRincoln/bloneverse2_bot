@@ -170,6 +170,25 @@ def content_back_kb(is_paid: bool, current_section_back: str):
         kb.append([InlineKeyboardButton(text="ОПЛАТИТЬ ПОДПИСКУ", callback_data="mode_paid")])
     return InlineKeyboardMarkup(inline_keyboard=kb)
 
+# ─── КЛАВИАТУРЫ С КНОПКАМИ-ССЫЛКАМИ НА ВИДЕО (СПОСОБ 1) ──────────────────────
+def paid_physics_kb():
+    return InlineKeyboardMarkup(inline_keyboard=[
+        # Вместо callback_data мы передаем url. При нажатии откроется ссылка.
+        [InlineKeyboardButton(text="🎬 Смотреть: Основы термодинамики", url="https://www.youtube.com/watch?v=dQw4w9WgXcQ")],
+        [InlineKeyboardButton(text="🎬 Смотреть: Механика газов", url="https://www.youtube.com/watch?v=dQw4w9WgXcQ")],
+        [InlineKeyboardButton(text="ЛИЧНЫЙ КАБИНЕТ", callback_data="go_cabinet")],
+        [InlineKeyboardButton(text="НАЗАД", callback_data="paid_edu")]
+    ])
+
+def paid_math_kb():
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="📐 Смотреть: Матанализ за 20 минут", url="https://www.youtube.com/watch?v=dQw4w9WgXcQ")],
+        [InlineKeyboardButton(text="📐 Смотреть: Геометрия с нуля", url="https://www.youtube.com/watch?v=dQw4w9WgXcQ")],
+        [InlineKeyboardButton(text="ЛИЧНЫЙ КАБИНЕТ", callback_data="go_cabinet")],
+        [InlineKeyboardButton(text="НАЗАД", callback_data="paid_edu")]
+    ])
+
+
 # ─── HANDLERS ─────────────────────────────────────────────────────────────────
 router = Router()
 
@@ -307,7 +326,7 @@ async def go_cabinet_page(callback: CallbackQuery):
 async def go_cabinet_callback(callback: CallbackQuery):
     await go_cabinet_page(callback)
 
-# ─── КОНТЕНТ ДЛЯ ПЛАТНОЙ ПОДПИСКИ ──────────────────────────────────────────
+# ─── КОНТЕНТ ДЛЯ ПЛАТНОЙ ПОДПИСКИ (ОФОРМЛЕННЫЙ СПОСОБ 1) ─────────────────────
 @router.callback_query(F.data == "linear_plan")
 async def linear_plan_handler(callback: CallbackQuery):
     await callback.message.edit_text(
@@ -348,8 +367,7 @@ async def paid_prod_handler(callback: CallbackQuery):
 @router.callback_query(F.data == "paid_biz")
 async def paid_biz_handler(callback: CallbackQuery):
     await callback.message.edit_text(
-        "В этом разделе научим добывать тебя первые деньги\. Смотри ролики по порядку\. Прокачивай себя\.\n\n"
-        "\_\[Место для видео по порядку для Бизнеса\]\_",
+        "В этом разделе научим добывать тебя первые деньги\. Смотри ролики по порядку\. Прокачивай себя\.",
         reply_markup=biz_kb(is_paid=True)
     )
 
@@ -363,22 +381,19 @@ async def paid_edu_handler(callback: CallbackQuery):
 
 @router.callback_query(F.data == "paid_physics")
 async def paid_physics_handler(callback: CallbackQuery):
+    # Теперь здесь выводятся полноценные кнопки под текстом
     await callback.message.edit_text(
-        "Здесь собран контент по физике\. Все в едином стиле\. Смотри все по порядку\. Главное — понимание\.\n\n"
-        "\*Ссылки на YouTube \(Физика\):\*\n"
-        "1\. \[Тема 1 — Введение\]\(https://youtube\.com/\.\.\.\)\n"
-        "2\. \[Тема 2 — Практика\]\(https://youtube\.com/\.\.\.\)",
-        reply_markup=content_back_kb(is_paid=True, current_section_back="paid_edu")
+        "Вы открыли премиум папку \*ФИЗИКА\*\.\n\n"
+        "Ниже представлены эксклюзивные видеоуроки\. Нажмите на кнопку под сообщением, чтобы запустить просмотр материала\.",
+        reply_markup=paid_physics_kb()
     )
 
 @router.callback_query(F.data == "paid_math")
 async def paid_math_handler(callback: CallbackQuery):
     await callback.message.edit_text(
-        "Здесь собран контент по математике\. Все в едином стиле\. Смотри все по порядку\. Главное — понимание\.\n\n"
-        "\*Ссылки на YouTube \(Математика\):\*\n"
-        "1\. \[Тема 1 — Алгебра\]\(https://youtube\.com/\.\.\.\)\n"
-        "2\. \[Тема 2 — Геометрия\]\(https://youtube\.com/\.\.\ \)",
-        reply_markup=content_back_kb(is_paid=True, current_section_back="paid_edu")
+        "Вы открыли премиум папку \*МАТЕМАТИКА\*\.\n\n"
+        "Ниже представлены эксклюзивные видеоуроки\. Нажмите на кнопку под сообщением, чтобы запустить просмотр материала\.",
+        reply_markup=paid_math_kb()
     )
 
 # ─── ЗАПУСК БОТА ──────────────────────────────────────────────────────────────
@@ -401,3 +416,6 @@ if __name__ == "__main__":
 
 
 
+
+
+    
