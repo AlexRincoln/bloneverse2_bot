@@ -16,8 +16,8 @@ PROMO_CODE = "ПАПКА"
 PROMO_DISCOUNT = 90
 SUBSCRIPTION_PRICE = "10 дол/мес"
 
-STICKER_WELCOME = "CAACAgIAAxkBAzmjtGoymMPPZt9rczW78Lv8ybc-Uz79AAIlHwACGSjRSnHdZJ9l8StePAQ"
-STICKER_LOBBY   = "CAACAgIAAxkBAzmjtGoymMPPZt9rczW78Lv8ybc-Uz79AAIlHwACGSjRSnHdZJ9l8StePAQ"
+STICKER_WELCOME = "CAACAgIAAxkBAAERcLhqOs0ZLhHJ4YZ0WltLvQRwUvOGtwACEwEAAlKJkSOAar-n7Nv_PDwE"
+STICKER_LOBBY   = "CAACAgIAAxkBAAERcLpqOs1Vd_ELjYXLWxEzqjgPlUqFDQACEAEAAlKJkSPESPH6zBwG8zwE"
 
 FREE_LIMIT_TEXT = "\n\n*Учтите, здесь собрана малая часть всего контента\. Чтобы получить доступ ко всему контенту — оплатите подписку\.*"
 
@@ -68,20 +68,20 @@ class Registration(StatesGroup):
 # ─── KEYBOARDS (БАЗОВАЯ НАВИГАЦИЯ) ────────────────────────────────────────────
 def main_menu_kb():
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="БЕСПЛАТНОЕ", callback_data="mode_free")],
-        [InlineKeyboardButton(text="ПЛАТНОЕ", callback_data="mode_paid")]
+        [InlineKeyboardButton(text="💾БЕСПЛАТНОЕ", callback_data="mode_free")],
+        [InlineKeyboardButton(text="💾ПЛАТНОЕ", callback_data="mode_paid")]
     ])
 
 def free_menu_kb():
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="САМОРАЗВИТИЕ", callback_data="free_self_dev")],
-        [InlineKeyboardButton(text="РАЗВЛЕЧЕНИЯ", callback_data="free_entertainment")],
-        [InlineKeyboardButton(text="НАЗАД", callback_data="to_main")]
+        [InlineKeyboardButton(text="💾САМОРАЗВИТИЕ", callback_data="free_self_dev")],
+        [InlineKeyboardButton(text="💾РАЗВЛЕЧЕНИЯ", callback_data="free_entertainment")],
+        [InlineKeyboardButton(text="⬅️НАЗАД", callback_data="to_main")]
     ])
 
 def pay_kb():
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="ОПЛАТИТЬ", callback_data="pay_action")]
+        [InlineKeyboardButton(text="➡️ОПЛАТИТЬ", callback_data="pay_action")]
     ])
 
 def check_pay_kb():
@@ -91,14 +91,14 @@ def check_pay_kb():
 
 def cabinet_kb():
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="ЛИЧНЫЙ КАБИНЕТ", callback_data="go_cabinet")]
+        [InlineKeyboardButton(text="❗ЛИЧНЫЙ КАБИНЕТ❗", callback_data="go_cabinet")]
     ])
 
 def paid_menu_kb():
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="САМОРАЗВИТИЕ", callback_data="paid_self_dev")],
-        [InlineKeyboardButton(text="РАЗВЛЕЧЕНИЯ", callback_data="paid_entertainment")],
-        [InlineKeyboardButton(text="ЛИНЕЙНЫЙ ПЛАН", callback_data="linear_plan")]
+        [InlineKeyboardButton(text="💾САМОРАЗВИТИЕ", callback_data="paid_self_dev")],
+        [InlineKeyboardButton(text="💾РАЗВЛЕЧЕНИЯ", callback_data="paid_entertainment")],
+        [InlineKeyboardButton(text="📹ЛИНЕЙНЫЙ ПЛАН", callback_data="linear_plan")]
     ])
 
 def linear_kb():
@@ -108,52 +108,52 @@ def linear_kb():
         [InlineKeyboardButton(text="📹 Видео 2: Личная эффективность", url="https://www.youtube.com/watch?v=dQw4w9WgXcQ")],
         [InlineKeyboardButton(text="💾 Скачать: Чек-лист и материалы", url="https://example.com")],
         # Навигация
-        [InlineKeyboardButton(text="СТРУКТУРА", callback_data="structure")],
-        [InlineKeyboardButton(text="НАЗАД", callback_data="go_cabinet")]
+        [InlineKeyboardButton(text="💾СТРУКТУРА", callback_data="structure")],
+        [InlineKeyboardButton(text="⬅️НАЗАД", callback_data="go_cabinet")]
     ])
 
 def structure_kb():
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="САМОРАЗВИТИЕ", callback_data="paid_self_dev")],
-        [InlineKeyboardButton(text="РАЗВЛЕЧЕНИЯ", callback_data="paid_entertainment")],
-        [InlineKeyboardButton(text="ЛИЧНЫЙ КАБИНЕТ", callback_data="go_cabinet")]
+        [InlineKeyboardButton(text="💾САМОРАЗВИТИЕ", callback_data="paid_self_dev")],
+        [InlineKeyboardButton(text="💾РАЗВЛЕЧЕНИЯ", callback_data="paid_entertainment")],
+        [InlineKeyboardButton(text="💾ЛИЧНЫЙ КАБИНЕТ", callback_data="go_cabinet")]
     ])
 
 def self_dev_kb(is_paid: bool):
     prefix = "paid_" if is_paid else "free_"
     kb = [
-        [InlineKeyboardButton(text="ПРОДУКТИВНОСТЬ", callback_data=f"{prefix}prod")],
-        [InlineKeyboardButton(text="ОБУЧЕНИЕ", callback_data=f"{prefix}edu")]
+        [InlineKeyboardButton(text="📹💾ПРОДУКТИВНОСТЬ", callback_data=f"{prefix}prod")],
+        [InlineKeyboardButton(text="💾ОБУЧЕНИЕ", callback_data=f"{prefix}edu")]
     ]
     if is_paid:
-        kb.append([InlineKeyboardButton(text="НАЗАД", callback_data="structure")])
+        kb.append([InlineKeyboardButton(text="⬅️НАЗАД", callback_data="structure")])
     else:
-        kb.append([InlineKeyboardButton(text="НАЗАД", callback_data="mode_free")])
-        kb.append([InlineKeyboardButton(text="ОПЛАТИТЬ ПОДПИСКУ", callback_data="mode_paid")])
+        kb.append([InlineKeyboardButton(text="⬅️НАЗАД", callback_data="mode_free")])
+        kb.append([InlineKeyboardButton(text="➡️ОПЛАТИТЬ ПОДПИСКУ", callback_data="mode_paid")])
     return InlineKeyboardMarkup(inline_keyboard=kb)
 
 def productivity_kb(is_paid: bool):
     prefix = "paid_" if is_paid else "free_"
     kb = [
-        [InlineKeyboardButton(text="БИЗНЕС", callback_data=f"{prefix}biz")],
-        [InlineKeyboardButton(text="УЧЕБА", callback_data=f"{prefix}edu")]  # Направляем сразу в edu (предметы)
+        [InlineKeyboardButton(text="📹БИЗНЕС", callback_data=f"{prefix}biz")],
+        [InlineKeyboardButton(text="📹УЧЕБА", callback_data=f"{prefix}edu")]  # Направляем сразу в edu (предметы)
     ]
     back_target = f"{prefix}self_dev"
-    kb.append([InlineKeyboardButton(text="НАЗАД", callback_data=back_target)])
+    kb.append([InlineKeyboardButton(text="⬅️НАЗАД", callback_data=back_target)])
     if not is_paid:
-        kb.append([InlineKeyboardButton(text="ОПЛАТИТЬ ПОДПИСКУ", callback_data="mode_paid")])
+        kb.append([InlineKeyboardButton(text="➡️ОПЛАТИТЬ ПОДПИСКУ", callback_data="mode_paid")])
     return InlineKeyboardMarkup(inline_keyboard=kb)
 
 def study_kb(is_paid: bool):
     prefix = "paid_" if is_paid else "free_"
     kb = [
-        [InlineKeyboardButton(text="ФИЗИКА", callback_data=f"{prefix}physics")],
-        [InlineKeyboardButton(text="МАТЕМАТИКА", callback_data=f"{prefix}math")]
+        [InlineKeyboardButton(text="📹ФИЗИКА", callback_data=f"{prefix}physics")],
+        [InlineKeyboardButton(text="📹МАТЕМАТИКА", callback_data=f"{prefix}math")]
     ]
     back_target = f"{prefix}prod"
-    kb.append([InlineKeyboardButton(text="НАЗАД", callback_data=back_target)])
+    kb.append([InlineKeyboardButton(text="⬅️НАЗАД", callback_data=back_target)])
     if not is_paid:
-        kb.append([InlineKeyboardButton(text="ОПЛАТИТЬ ПОДПИСКУ", callback_data="mode_paid")])
+        kb.append([InlineKeyboardButton(text="➡️ОПЛАТИТЬ ПОДПИСКУ", callback_data="mode_paid")])
     return InlineKeyboardMarkup(inline_keyboard=kb)
 
 
@@ -163,28 +163,28 @@ def study_kb(is_paid: bool):
 def free_entertainment_kb():
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="🎬 Демо-ролик: Анимация", url="https://www.youtube.com/watch?v=dQw4w9WgXcQ")],
-        [InlineKeyboardButton(text="НАЗАД", callback_data="mode_free")],
+        [InlineKeyboardButton(text="⬅️НАЗАД", callback_data="mode_free")],
         [InlineKeyboardButton(text="💳 ОПЛАТИТЬ ПОДПИСКУ", callback_data="mode_paid")]
     ])
 
 def free_biz_kb():
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="🎬 Как заработать первые 100$", url="https://www.youtube.com/watch?v=dQw4w9WgXcQ")],
-        [InlineKeyboardButton(text="НАЗАД", callback_data="free_prod")],
+        [InlineKeyboardButton(text="⬅️НАЗАД", callback_data="free_prod")],
         [InlineKeyboardButton(text="💳 ОПЛАТИТЬ ПОДПИСКУ", callback_data="mode_paid")]
     ])
 
 def free_physics_kb():
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="🎬 Физика: Демо-урок", url="https://www.youtube.com/watch?v=dQw4w9WgXcQ")],
-        [InlineKeyboardButton(text="НАЗАД", callback_data="free_edu")],
+        [InlineKeyboardButton(text="⬅️НАЗАД", callback_data="free_edu")],
         [InlineKeyboardButton(text="💳 ОПЛАТИТЬ ПОДПИСКУ", callback_data="mode_paid")]
     ])
 
 def free_math_kb():
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="🎬 Математика: Демо-урок", url="https://www.youtube.com/watch?v=dQw4w9WgXcQ")],
-        [InlineKeyboardButton(text="НАЗАД", callback_data="free_edu")],
+        [InlineKeyboardButton(text="⬅️НАЗАД", callback_data="free_edu")],
         [InlineKeyboardButton(text="💳 ОПЛАТИТЬ ПОДПИСКУ", callback_data="mode_paid")]
     ])
 
@@ -193,32 +193,32 @@ def paid_entertainment_kb():
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="🍿 Фильм 1: Полная версия", url="https://www.youtube.com/watch?v=dQw4w9WgXcQ")],
         [InlineKeyboardButton(text="🍿 Шоу 2: За кулисами", url="https://www.youtube.com/watch?v=dQw4w9WgXcQ")],
-        [InlineKeyboardButton(text="ЛИЧНЫЙ КАБИНЕТ", callback_data="go_cabinet")],
-        [InlineKeyboardButton(text="НАЗАД", callback_data="structure")]
+        [InlineKeyboardButton(text="💾ЛИЧНЫЙ КАБИНЕТ", callback_data="go_cabinet")],
+        [InlineKeyboardButton(text="⬅️НАЗАД", callback_data="structure")]
     ])
 
 def paid_biz_kb():
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="💼 Урок 1: Поиск ниши и запуск", url="https://www.youtube.com/watch?v=dQw4w9WgXcQ")],
         [InlineKeyboardButton(text="💼 Урок 2: Команда и масштабирование", url="https://www.youtube.com/watch?v=dQw4w9WgXcQ")],
-        [InlineKeyboardButton(text="ЛИЧНЫЙ КАБИНЕТ", callback_data="go_cabinet")],
-        [InlineKeyboardButton(text="НАЗАД", callback_data="paid_prod")]
+        [InlineKeyboardButton(text="💾ЛИЧНЫЙ КАБИНЕТ", callback_data="go_cabinet")],
+        [InlineKeyboardButton(text="⬅️НАЗАД", callback_data="paid_prod")]
     ])
 
 def paid_physics_kb():
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="⚡️ Смотреть: Основы термодинамики", url="https://www.youtube.com/watch?v=dQw4w9WgXcQ")],
         [InlineKeyboardButton(text="⚡️ Смотреть: Гальванические элементы", url="https://www.youtube.com/watch?v=dQw4w9WgXcQ")],
-        [InlineKeyboardButton(text="ЛИЧНЫЙ КАБИНЕТ", callback_data="go_cabinet")],
-        [InlineKeyboardButton(text="НАЗАД", callback_data="paid_edu")]
+        [InlineKeyboardButton(text="💾ЛИЧНЫЙ КАБИНЕТ", callback_data="go_cabinet")],
+        [InlineKeyboardButton(text="⬅️НАЗАД", callback_data="paid_edu")]
     ])
 
 def paid_math_kb():
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="📐 Смотреть: Матанализ за 20 минут", url="https://www.youtube.com/watch?v=dQw4w9WgXcQ")],
         [InlineKeyboardButton(text="📐 Смотреть: Геометрия с нуля", url="https://www.youtube.com/watch?v=dQw4w9WgXcQ")],
-        [InlineKeyboardButton(text="ЛИЧНЫЙ КАБИНЕТ", callback_data="go_cabinet")],
-        [InlineKeyboardButton(text="НАЗАД", callback_data="paid_edu")]
+        [InlineKeyboardButton(text="💾ЛИЧНЫЙ КАБИНЕТ", callback_data="go_cabinet")],
+        [InlineKeyboardButton(text="⬅️НАЗАД", callback_data="paid_edu")]
     ])
 
 
@@ -242,8 +242,8 @@ async def process_nickname(message: Message, state: FSMContext):
     await state.clear()
     
     await message.answer(
-        "Эта платформа имеет два направления: *ПЛАТНОЕ/БЕСПЛАТНОЕ*\.\n"
-        "Выбирайте направление, с которым хотите ознакомиться\.",
+        "🔊Эта платформа имеет два направления: *ПЛАТНОЕ/БЕСПЛАТНОЕ*\.\n"
+        "⌨️Выбирайте направление, с которым хотите ознакомиться\.",
         reply_markup=main_menu_kb()
     )
 
@@ -251,7 +251,7 @@ async def process_nickname(message: Message, state: FSMContext):
 async def linear_plan_handler(callback: CallbackQuery):
     await callback.message.edit_text(
         "❗ *Добро пожаловать в Линейный План\!* ❗\n\n"
-        "Здесь собран _весь контент платформы без разделения на папки_\. Вы можете изучать материалы просто один за другим, двигаясь по порядку\.\n\n"
+        "💾Здесь собран _весь контент платформы без разделения на папки_\. Вы можете изучать материалы просто один за другим, двигаясь по порядку\.\n\n"
         "🔊 _Рекомендуем включить уведомления, чтобы не пропустить новые уроки\._\n\n"
         "📹 *Ниже представлены доступные видеоматериалы и файлы для скачивания:*",
         reply_markup=linear_kb()
@@ -261,15 +261,15 @@ async def linear_plan_handler(callback: CallbackQuery):
 @router.callback_query(F.data == "mode_free")
 async def free_mode(callback: CallbackQuery):
     await callback.message.edit_text(
-        "Хорошо\. На этом направлении имеется немного стилизованного контента\. "
-        "Выбирайте, что вам по душе:",
+        "Хорошо\. ❗На этом направлении имеется немного стилизованного контента\. "
+        "Выбирайте🔊, что вам по душе:",
         reply_markup=free_menu_kb()
     )
 
 @router.callback_query(F.data == "free_self_dev")
 async def free_self_dev_handler(callback: CallbackQuery):
     await callback.message.edit_text(
-        "Здесь можно прокачать себя\. Сейчас доступны такие направления:" + FREE_LIMIT_TEXT,
+        "Здесь можно прокачать себя\. 💾Сейчас доступны такие направления:" + FREE_LIMIT_TEXT,
         reply_markup=self_dev_kb(is_paid=False)
     )
 
@@ -277,14 +277,14 @@ async def free_self_dev_handler(callback: CallbackQuery):
 async def free_ent_handler(callback: CallbackQuery):
     await callback.message.edit_text(
         "Вы открыли бесплатный раздел \*РАЗВЛЕЧЕНИЯ\*\.\n\n"
-        "Ниже доступен один ознакомительный ролик\. Полный контент доступен по подписке\." + FREE_LIMIT_TEXT,
+        "📹Ниже доступен один ознакомительный ролик\. Полный контент доступен по подписке\." + FREE_LIMIT_TEXT,
         reply_markup=free_entertainment_kb()
     )
 
 @router.callback_query(F.data == "free_prod")
 async def free_prod_handler(callback: CallbackQuery):
     await callback.message.edit_text(
-        "Здесь можно прокачать свою внутреннюю систему\. Прокачать ментальное состояние\. "
+        "🔊Здесь можно прокачать свою внутреннюю систему\. Прокачать ментальное состояние\. "
         "Научиться мечтать\. Нажимай\. Что тебя интересует больше всего?" + FREE_LIMIT_TEXT,
         reply_markup=productivity_kb(is_paid=False)
     )
@@ -293,14 +293,14 @@ async def free_prod_handler(callback: CallbackQuery):
 async def free_biz_handler(callback: CallbackQuery):
     await callback.message.edit_text(
         "Вы открыли бесплатный раздел \*БИЗНЕС\*\.\n\n"
-        "Ниже доступен один ознакомительный ролик\. Полный контент доступен по подписке\." + FREE_LIMIT_TEXT,
+        "🔊Ниже доступен один ознакомительный ролик\. Полный контент доступен по подписке\." + FREE_LIMIT_TEXT,
         reply_markup=free_biz_kb()
     )
 
 @router.callback_query(F.data == "free_edu")
 async def free_edu_handler(callback: CallbackQuery):
     await callback.message.edit_text(
-        "В этом разделе у нас есть несколько направлений\. Здесь мы подготовим тебя к экзаменам\. "
+        "🔊В этом разделе у нас есть несколько направлений\. Здесь мы подготовим тебя к экзаменам\. "
         "Выбирай интересующий предмет\. Скачивай полезные материалы\." + FREE_LIMIT_TEXT,
         reply_markup=study_kb(is_paid=False)
     )
@@ -308,7 +308,7 @@ async def free_edu_handler(callback: CallbackQuery):
 @router.callback_query(F.data == "free_physics")
 async def free_physics_handler(callback: CallbackQuery):
     await callback.message.edit_text(
-        "Вы открыли бесплатный раздел \*ФИЗИКА\*\.\n\n"
+        "🔊Вы открыли бесплатный раздел \*ФИЗИКА\*\.\n\n"
         "Ниже доступен один ознакомительный ролик\. Полный контент доступен по подписке\." + FREE_LIMIT_TEXT,
         reply_markup=free_physics_kb()
     )
@@ -316,7 +316,7 @@ async def free_physics_handler(callback: CallbackQuery):
 @router.callback_query(F.data == "free_math")
 async def free_math_handler(callback: CallbackQuery):
     await callback.message.edit_text(
-        "Вы открыли бесплатный раздел \*МАТЕМАТИКА\*\.\n\n"
+        "🔊Вы открыли бесплатный раздел \*МАТЕМАТИКА\*\.\n\n"
         "Ниже доступен один ознакомительный ролик\. Полный контент доступен по подписке\." + FREE_LIMIT_TEXT,
         reply_markup=free_math_kb()
     )
@@ -331,7 +331,7 @@ async def paid_mode(callback: CallbackQuery):
 
     await callback.message.edit_text(
         "Хорошо\. Вам будет доступен весь стилизованный контент\. "
-        "Чтобы продолжить, вам необходимо произвести оплату\. Единая помесячная подписка\.",
+        "🔊Чтобы продолжить, вам необходимо произвести оплату\. Единая помесячная подписка\.",
         reply_markup=pay_kb()
     )
 
