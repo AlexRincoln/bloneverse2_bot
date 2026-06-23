@@ -1,7 +1,7 @@
 import asyncio
 import sqlite3
 import logging
-from aiogram import Bot, Dispatcher, F
+from aiogram import Bot, Dispatcher, F, Router  # <-- ТУТ ИСПРАВЛЕНО
 from aiogram.types import Message, CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
@@ -19,7 +19,6 @@ SUBSCRIPTION_PRICE = "10 дол/мес"
 STICKER_WELCOME = "CAACAgIAAxkBAzmjtGoymMPPZt9rczW78Lv8ybc-Uz79AAIlHwACGSjRSnHdZJ9l8StePAQ"
 STICKER_LOBBY   = "CAACAgIAAxkBAzmjtGoymMPPZt9rczW78Lv8ybc-Uz79AAIlHwACGSjRSnHdZJ9l8StePAQ"
 
-# Для MarkdownV2 все специальные символы (включая точки, дефисы и скобки) внутри обычного текста требуют экранирования через \
 FREE_LIMIT_TEXT = "\n\n*Учтите, здесь собрана малая часть всего контента\. Чтобы получить доступ ко всему контенту — оплатите подписку\.*"
 
 # ─── DATABASE ─────────────────────────────────────────────────────────────────
@@ -280,7 +279,6 @@ async def paid_mode(callback: CallbackQuery):
 
 @router.callback_query(F.data == "pay_action")
 async def pay_action_handler(callback: CallbackQuery):
-    # Экранируем точку в цене "10 дол/мес" -> "10 дол/мес\."
     escaped_price = SUBSCRIPTION_PRICE.replace(".", "\.")
     await callback.message.edit_text(
         f"Стоимость подписки: *{escaped_price}*\.\n\n"
@@ -388,7 +386,6 @@ async def main():
     logging.basicConfig(level=logging.INFO)
     init_db()
     
-    # Исправлена инициализация parse_mode согласно спецификации aiogram 3.x
     bot = Bot(
         token=BOT_TOKEN, 
         default=DefaultBotProperties(parse_mode=ParseMode.MARKDOWN_V2)
