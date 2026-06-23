@@ -7,6 +7,8 @@ from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.storage.memory import MemoryStorage
+from aiogram.client.default import DefaultBotProperties
+from aiogram.enums import ParseMode
 
 # ─── CONFIG ───────────────────────────────────────────────────────────────────
 BOT_TOKEN = "8939981008:AAGODrnmp9qNNs3gPRxpkKl8IUlzX0Sk21o"
@@ -17,7 +19,8 @@ SUBSCRIPTION_PRICE = "10 дол/мес"
 STICKER_WELCOME = "CAACAgIAAxkBAzmjtGoymMPPZt9rczW78Lv8ybc-Uz79AAIlHwACGSjRSnHdZJ9l8StePAQ"
 STICKER_LOBBY   = "CAACAgIAAxkBAzmjtGoymMPPZt9rczW78Lv8ybc-Uz79AAIlHwACGSjRSnHdZJ9l8StePAQ"
 
-FREE_LIMIT_TEXT = "\n\n*Учтите, здесь собрана малая часть всего контента. Чтобы получить доступ ко всему контенту — оплатите подписку.*"
+# Для MarkdownV2 все специальные символы (включая точки, дефисы и скобки) внутри обычного текста требуют экранирования через \
+FREE_LIMIT_TEXT = "\n\n*Учтите, здесь собрана малая часть всего контента\. Чтобы получить доступ ко всему контенту — оплатите подписку\.*"
 
 # ─── DATABASE ─────────────────────────────────────────────────────────────────
 DB_PATH = "database.db"
@@ -44,7 +47,7 @@ def add_user(user_id: int, username: str):
 def update_nickname(user_id: int, nickname: str):
     with sqlite3.connect(DB_PATH) as conn:
         cursor = conn.cursor()
-        cursor.execute("UPDATE users SET nickname = ? WHERE user_id = ?", (user_id, nickname))
+        cursor.execute("UPDATE users SET nickname = ? WHERE user_id = ?", (nickname, user_id))
         conn.commit()
 
 def set_premium(user_id: int, status: int):
@@ -62,6 +65,7 @@ def get_user(user_id: int):
 # ─── STATES ───────────────────────────────────────────────────────────────────
 class Registration(StatesGroup):
     waiting_for_nickname = State()
+
 # ─── KEYBOARDS ────────────────────────────────────────────────────────────────
 def main_menu_kb():
     return InlineKeyboardMarkup(inline_keyboard=[
@@ -175,8 +179,8 @@ async def cmd_start(message: Message, state: FSMContext):
     add_user(message.from_user.id, message.from_user.username)
     await message.answer_sticker(STICKER_WELCOME)
     await message.answer(
-        "Приветствуем вас. Я *Alex*. Вы находитесь на Telegram платформе *ONEVERSE*.\n\n"
-        "Чтобы продолжить, *ВВЕДИТЕ СВОЙ НИК В TELEGRAM*."
+        "Приветствуем вас\. Я *Alex*\. Вы находитесь на Telegram платформе *ONEVERSE*\.\n\n"
+        "Чтобы продолжить, *ВВЕДИТЕ СВОЙ НИК В TELEGRAM*\."
     )
     await state.set_state(Registration.waiting_for_nickname)
 
@@ -187,16 +191,16 @@ async def process_nickname(message: Message, state: FSMContext):
     await state.clear()
     
     await message.answer(
-        "Эта платформа имеет два направления: *ПЛАТНОЕ/БЕСПЛАТНОЕ*.\n"
-        "Выбирайте направление, с которым хотите ознакомиться.",
+        "Эта платформа имеет два направления: *ПЛАТНОЕ/БЕСПЛАТНОЕ*\.\n"
+        "Выбирайте направление, с которым хотите ознакомиться\.",
         reply_markup=main_menu_kb()
     )
 
 @router.callback_query(F.data == "to_main")
 async def back_to_main(callback: CallbackQuery):
     await callback.message.edit_text(
-        "Эта платформа имеет два направления: *ПЛАТНОЕ/БЕСПЛАТНОЕ*.\n"
-        "Выбирайте направление, с которым хотите ознакомиться.",
+        "Эта платформа имеет два направления: *ПЛАТНОЕ/БЕСПЛАТНОЕ*\.\n"
+        "Выбирайте направление, с которым хотите ознакомиться\.",
         reply_markup=main_menu_kb()
     )
 
@@ -204,7 +208,7 @@ async def back_to_main(callback: CallbackQuery):
 @router.callback_query(F.data == "mode_free")
 async def free_mode(callback: CallbackQuery):
     await callback.message.edit_text(
-        "Хорошо. На этом направлении имеется немного стилизованного контента. "
+        "Хорошо\. На этом направлении имеется немного стилизованного контента\. "
         "Выбирайте, что вам по душе:",
         reply_markup=free_menu_kb()
     )
@@ -212,54 +216,51 @@ async def free_mode(callback: CallbackQuery):
 @router.callback_query(F.data == "free_self_dev")
 async def free_self_dev_handler(callback: CallbackQuery):
     await callback.message.edit_text(
-        "Здесь можно прокачать себя. Сейчас доступны такие направления:" + FREE_LIMIT_TEXT,
+        "Здесь можно прокачать себя\. Сейчас доступны такие направления:" + FREE_LIMIT_TEXT,
         reply_markup=self_dev_kb(is_paid=False)
     )
 
 @router.callback_query(F.data == "free_entertainment")
 async def free_ent_handler(callback: CallbackQuery):
     await callback.message.edit_text(
-        "_Раздел Развлечения (Бесплатно)_\nЗдесь будут развлекательные материалы." + FREE_LIMIT_TEXT,
+        "\_Раздел Развлечения \(Бесплатно\)\_\nЗдесь будут развлекательные материалы\." + FREE_LIMIT_TEXT,
         reply_markup=content_back_kb(is_paid=False, current_section_back="mode_free")
     )
 
 @router.callback_query(F.data == "free_prod")
 async def free_prod_handler(callback: CallbackQuery):
     await callback.message.edit_text(
-        "Здесь можно прокачать свою внутреннюю систему. Прокачать ментальное состояние. "
-        "Научиться мечтать. Нажимай. Что тебя интересует больше всего?" + FREE_LIMIT_TEXT,
+        "Здесь можно прокачать свою внутреннюю систему\. Прокачать ментальное состояние\. "
+        "Научиться мечтать\. Нажимай\. Что тебя интересует больше всего?" + FREE_LIMIT_TEXT,
         reply_markup=productivity_kb(is_paid=False)
     )
 
 @router.callback_query(F.data == "free_biz")
 async def free_biz_handler(callback: CallbackQuery):
-    # МЕСТО ДЛЯ БЕСПЛАТНОГО ВИДЕО (БИЗНЕС) БЕЗ СОРТИРОВКИ
     await callback.message.edit_text(
-        "В этом разделе научим добывать тебя первые деньги. Смотри ролики по порядку. Прокачивай себя." + FREE_LIMIT_TEXT,
+        "В этом разделе научим добывать тебя первые деньги\. Смотри ролики по порядку\. Прокачивай себя\." + FREE_LIMIT_TEXT,
         reply_markup=biz_kb(is_paid=False)
     )
 
 @router.callback_query(F.data == "free_edu")
 async def free_edu_handler(callback: CallbackQuery):
     await callback.message.edit_text(
-        "В этом разделе у нас есть несколько направлений. Здесь мы подготовим тебя к экзаменам. "
-        "Смотри все по порядку. Скачивай полезные материалы." + FREE_LIMIT_TEXT,
+        "В этом разделе у нас есть несколько направлений\. Здесь мы подготовим тебя к экзаменам\. "
+        "Смотри все по порядку\. Скачивай полезные материалы\." + FREE_LIMIT_TEXT,
         reply_markup=study_kb(is_paid=False)
     )
 
 @router.callback_query(F.data == "free_physics")
 async def free_physics_handler(callback: CallbackQuery):
-    # МЕСТО ДЛЯ БЕСПЛАТНЫХ ССЫЛОК НА ЮТУБ (ФИЗИКА)
     await callback.message.edit_text(
-        "Здесь собран контент по физике. Все в едином стиле. Смотри все по порядку. Главное — понимание." + FREE_LIMIT_TEXT,
+        "Здесь собран контент по физике\. Все в едином стиле\. Смотри все по порядку\. Главное — понимание\." + FREE_LIMIT_TEXT,
         reply_markup=content_back_kb(is_paid=False, current_section_back="free_edu")
     )
 
 @router.callback_query(F.data == "free_math")
 async def free_math_handler(callback: CallbackQuery):
-    # МЕСТО ДЛЯ БЕСПЛАТНЫХ ССЫЛОК НА ЮТУБ (МАТЕМАТИКА)
     await callback.message.edit_text(
-        "Здесь собран контент по математике. Все в едином стиле. Смотри все по порядку. Главное — понимание." + FREE_LIMIT_TEXT,
+        "Здесь собран контент по математике\. Все в едином стиле\. Смотри все по порядку\. Главное — понимание\." + FREE_LIMIT_TEXT,
         reply_markup=content_back_kb(is_paid=False, current_section_back="free_edu")
     )
 
@@ -272,17 +273,19 @@ async def paid_mode(callback: CallbackQuery):
         return
 
     await callback.message.edit_text(
-        "Хорошо. Вам будет доступен весь стилизованный контент. "
-        "Чтобы продолжить, вам необходимо произвести оплату. Единая помесячная подписка.",
+        "Хорошо\. Вам будет доступен весь стилизованный контент\. "
+        "Чтобы продолжить, вам необходимо произвести оплату\. Единая помесячная подписка\.",
         reply_markup=pay_kb()
     )
 
 @router.callback_query(F.data == "pay_action")
 async def pay_action_handler(callback: CallbackQuery):
+    # Экранируем точку в цене "10 дол/мес" -> "10 дол/мес\."
+    escaped_price = SUBSCRIPTION_PRICE.replace(".", "\.")
     await callback.message.edit_text(
-        f"Стоимость подписки: *{SUBSCRIPTION_PRICE}*.\n\n"
-        "🔗 [ССЫЛКА НА ОПЛАТУ (ПУСТЫШКА)](https://example.com)\n\n"
-        "Осталось место для интеграции реальной платежной системы.",
+        f"Стоимость подписки: *{escaped_price}*\.\n\n"
+        "🔗 \[[ССЫЛКА НА ОПЛАТУ \(ПУСТЫШКА\)](https://example.com)\]\n\n"
+        "Осталось место для интеграции реальной платежной системы\.",
         reply_markup=check_pay_kb()
     )
 
@@ -290,15 +293,15 @@ async def pay_action_handler(callback: CallbackQuery):
 async def pay_success_handler(callback: CallbackQuery):
     set_premium(callback.from_user.id, 1)
     await callback.message.edit_text(
-        "Ваша подписка оплачена. Нажимайте *ПЕРЕЙТИ В ЛИЧНЫЙ КАБИНЕТ*.",
+        "Ваша подписка оплачена\. Нажимайте *ПЕРЕЙТИ В ЛИЧНЫЙ КАБИНЕТ*\.",
         reply_markup=cabinet_kb()
     )
 
 async def go_cabinet_page(callback: CallbackQuery):
     await callback.message.edit_text(
-        "Ваш *личный кабинет*. Отсюда будет доступ ко всему контенту. "
-        "Путешествие по папкам. Находите нужные для себя видео и статьи. "
-        "Либо можете просто нажать — линейный план.",
+        "Ваш *личный кабинет*\. Отсюда будет доступ ко всему контенту\. "
+        "Путешествие по папкам\. Находите нужные для себя видео и статьи\. "
+        "Либо можете просто нажать — линейный план\.",
         reply_markup=paid_menu_kb()
     )
 
@@ -309,78 +312,74 @@ async def go_cabinet_callback(callback: CallbackQuery):
 # ─── КОНТЕНТ ДЛЯ ПЛАТНОЙ ПОДПИСКИ ──────────────────────────────────────────
 @router.callback_query(F.data == "linear_plan")
 async def linear_plan_handler(callback: CallbackQuery):
-    # СЮДА МОЖНО ВСТАВИТЬ ОТПРАВКУ ВИДЕО НАПРЯМУЮ: await callback.message.answer_video(video="file_id")
     await callback.message.edit_text(
-        "Здесь будет весь контент без сортировки. Просто по порядку. Смотрите и изучайте.\n\n"
-        "_[Место для видео, которые вы будете заливать прямо в Telegram]_",
+        "Здесь будет весь контент без сортировки\. Просто по порядку\. Смотрите и изучайте\.\n\n"
+        "\_\[Место для видео, которые вы будете заливать прямо в Telegram\]\_",
         reply_markup=linear_kb()
     )
 
 @router.callback_query(F.data == "structure")
 async def structure_handler(callback: CallbackQuery):
     await callback.message.edit_text(
-        "Вы находитесь на промежуточной странице. Здесь можно выбрать — какой раздел вам интересен.",
+        "Вы находитесь на промежуточной странице\. Здесь можно выбрать — какой раздел вам интересен\.",
         reply_markup=structure_kb()
     )
 
 @router.callback_query(F.data == "paid_self_dev")
 async def paid_self_dev_handler(callback: CallbackQuery):
     await callback.message.edit_text(
-        "Здесь можно прокачать себя. Сейчас доступны такие направления:",
+        "Здесь можно прокачать себя\. Сейчас доступны такие направления:",
         reply_markup=self_dev_kb(is_paid=True)
     )
 
 @router.callback_query(F.data == "paid_entertainment")
 async def paid_ent_handler(callback: CallbackQuery):
     await callback.message.edit_text(
-        "_Раздел Развлечения (Платный)_\nЗдесь находится полный развлекательный контент.",
+        "\_Раздел Развлечения \(Платный\)\_\nЗдесь находится полный развлекательный контент\.",
         reply_markup=content_back_kb(is_paid=True, current_section_back="structure")
     )
 
 @router.callback_query(F.data == "paid_prod")
 async def paid_prod_handler(callback: CallbackQuery):
     await callback.message.edit_text(
-        "Здесь можно прокачать свою внутреннюю систему. Прокачать ментальное состояние. "
-        "Научиться мечтать. Нажимай. Что тебя интересует больше всего?",
+        "Здесь можно прокачать свою внутреннюю систему\. Прокачать ментальное состояние\. "
+        "Научиться мечтать\. Нажимай\. Что тебя интересует больше всего?",
         reply_markup=productivity_kb(is_paid=True)
     )
 
 @router.callback_query(F.data == "paid_biz")
 async def paid_biz_handler(callback: CallbackQuery):
-    # МЕСТО ДЛЯ ПЛАТНЫХ ВИДЕО ПО БИЗНЕСУ ПО ПОРЯДКУ
     await callback.message.edit_text(
-        "В этом разделе научим добывать тебя первые деньги. Смотри ролики по порядку. Прокачивай себя.\n\n"
-        "_[Место для видео по порядку для Бизнеса]_",
+        "В этом разделе научим добывать тебя первые деньги\. Смотри ролики по порядку\. Прокачивай себя\.\n\n"
+        "\_\[Место для видео по порядку для Бизнеса\]\_",
         reply_markup=biz_kb(is_paid=True)
     )
 
 @router.callback_query(F.data == "paid_edu")
 async def paid_edu_handler(callback: CallbackQuery):
     await callback.message.edit_text(
-        "В этом разделе у нас есть несколько направлений. Здесь мы подготовим тебя к экзаменам. "
-        "Смотри все по порядку. Скачивай полезные материалы.",
+        "В этом разделе у нас есть несколько направлений\. Здесь мы подготовим тебя к экзаменам\. "
+        "Смотри все по порядку\. Скачивай полезные материалы\.",
         reply_markup=study_kb(is_paid=True)
     )
 
 @router.callback_query(F.data == "paid_physics")
 async def paid_physics_handler(callback: CallbackQuery):
-    # МЕСТО ДЛЯ ССЫЛОК НА ПЛАТНЫЕ ВИДЕО С ЮТУБА (ФИЗИКА)
     await callback.message.edit_text(
-        "Здесь собран контент по физике. Все в едином стиле. Смотри все по порядку. Главное — понимание.\n\n"
-        "*Ссылки на YouTube (Физика):*\n"
-        "1. [Тема 1 — Введение](https://youtube.com/...)\n"
-        "2. [Тема 2 — Практика](https://youtube.com/...)",
+        "Здесь собран контент по физике\. Все в едином стиле\. Смотри все по порядку\. Главное — понимание\.\n\n"
+        "\*Ссылки на YouTube \(Физика\):\*\n"
+        "1\. \[Тема 1 — Введение\]\(https://youtube\.com/\.\.\.\)\n"
+        "2\. \[Тема 2 — Практика\]\(https://youtube\.com/\.\.\.\)",
         reply_markup=content_back_kb(is_paid=True, current_section_back="paid_edu")
     )
 
 @router.callback_query(F.data == "paid_math")
 async def paid_math_handler(callback: CallbackQuery):
-    # МЕСТО ДЛЯ ССЫЛОК НА ПЛАТНЫЕ ВИДЕО С ЮТУБА (МАТЕМАТИКА)
     await callback.message.edit_text(
-        "Здесь собран контент по математике. Все в едином стиле. Смотри все по порядку. Главное — понимание.\n\n"
-        "*Ссылки на YouTube (Математика):*\n"
-        "1. [Тема 1 — Алгебра](https://youtube.com/...)\n"
-        "2. [Тема 2 — Геометрия](https://youtube.com/...)",
+        "Здесь собран контент по математике\. Все в едином стиле\. Смотри все по порядку\. Главное — понимание\.\n\n"
+        "\*Ссылки на YouTube \(Математика\):\*\n"
+        "1\. \[Тема 1 — Алгебра\]\(https://youtube\.com/\.\.\.\)\n"
+        "2\. \[Тема 2 — Геометрия\]\(https://youtube\.com/\.\.\ \)",
         reply_markup=content_back_kb(is_paid=True, current_section_back="paid_edu")
     )
 
@@ -389,7 +388,11 @@ async def main():
     logging.basicConfig(level=logging.INFO)
     init_db()
     
-    bot = Bot(token=BOT_TOKEN, parse_mode="Markdown")
+    # Исправлена инициализация parse_mode согласно спецификации aiogram 3.x
+    bot = Bot(
+        token=BOT_TOKEN, 
+        default=DefaultBotProperties(parse_mode=ParseMode.MARKDOWN_V2)
+    )
     dp = Dispatcher(storage=MemoryStorage())
     dp.include_router(router)
     
@@ -398,3 +401,6 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
+
+
