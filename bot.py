@@ -103,6 +103,11 @@ def paid_menu_kb():
 
 def linear_kb():
     return InlineKeyboardMarkup(inline_keyboard=[
+        # Кнопки-ссылки на видео для Линейного плана
+        [InlineKeyboardButton(text="📹 Видео 1: Введение в систему", url="https://www.youtube.com/watch?v=dQw4w9WgXcQ")],
+        [InlineKeyboardButton(text="📹 Видео 2: Личная эффективность", url="https://www.youtube.com/watch?v=dQw4w9WgXcQ")],
+        [InlineKeyboardButton(text="💾 Скачать: Чек-лист и материалы", url="https://example.com")],
+        # Навигация
         [InlineKeyboardButton(text="СТРУКТУРА", callback_data="structure")],
         [InlineKeyboardButton(text="НАЗАД", callback_data="go_cabinet")]
     ])
@@ -242,12 +247,14 @@ async def process_nickname(message: Message, state: FSMContext):
         reply_markup=main_menu_kb()
     )
 
-@router.callback_query(F.data == "to_main")
-async def back_to_main(callback: CallbackQuery):
+@router.callback_query(F.data == "linear_plan")
+async def linear_plan_handler(callback: CallbackQuery):
     await callback.message.edit_text(
-        "Эта платформа имеет два направления: *ПЛАТНОЕ/БЕСПЛАТНОЕ*\.\n"
-        "Выбирайте направление, с которым хотите ознакомиться\.",
-        reply_markup=main_menu_kb()
+        "❗ *Добро пожаловать в Линейный План\!* ❗\n\n"
+        "Здесь собран _весь контент платформы без разделения на папки_\. Вы можете изучать материалы просто один за другим, двигаясь по порядку\.\n\n"
+        "🔊 _Рекомендуем включить уведомления, чтобы не пропустить новые уроки\._\n\n"
+        "📹 *Ниже представлены доступные видеоматериалы и файлы для скачивания:*",
+        reply_markup=linear_kb()
     )
 
 # ─── ВЕТКА БЕСПЛАТНОГО НАПРАВЛЕНИЯ ──────────────────────────────────────────
