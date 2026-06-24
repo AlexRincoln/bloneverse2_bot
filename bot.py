@@ -179,10 +179,11 @@ async def cmd_start(message: Message, state: FSMContext):
     add_user(message.from_user.id, message.from_user.username)
     await message.answer_sticker(STICKER_WELCOME)
     await message.answer(
-        "&@#°√§∆ приветствуем вас\. Я *Alex*\. Вы находитесь на платформе *ONEVERSE*\.\n\n"
+        "\&\@\#°√§∆ приветствуем вас\. Я *Alex*\. Вы находитесь на платформе *ONEVERSE*\.\n\n"
         "Чтобы продолжить, *ВВЕДИТЕ СВОЙ НИК В TELEGRAM*\."
     )
     await state.set_state(Registration.waiting_for_nickname)
+
 
 @router.message(Registration.waiting_for_nickname)
 async def process_nickname(message: Message, state: FSMContext):
