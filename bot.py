@@ -116,6 +116,7 @@ def self_dev_kb(is_paid: bool):
     prefix = "paid_" if is_paid else "free_"
     kb = [
         [InlineKeyboardButton(text="√ ОБУЧЕНИЕ §", callback_data=f"{prefix}edu")],
+        # Вот тут должен быть {prefix}wealth, а не старая продуктивность!
         [InlineKeyboardButton(text="∆ БОГАТСТВО #", callback_data=f"{prefix}wealth")]
     ]
     if is_paid:
@@ -247,7 +248,7 @@ async def free_math_handler(callback: CallbackQuery):
 @router.callback_query(F.data == "free_wealth")
 async def free_wealth_handler(callback: CallbackQuery):
     await callback.message.edit_text(
-        "&@#_ Добро пожаловать во вкладку БОГАТСТВО\._\n"
+        "\&\@\#\_ Добро пожаловать во вкладку БОГАТСТВО\._\n"
         "**Обратите внимание:** _тут будет только фанатская анимация, сделанная в blender, это не несёт какой\-то поучительный характер\._",
         reply_markup=wealth_kb(is_paid=False)
     )
@@ -395,10 +396,11 @@ async def paid_math_handler(callback: CallbackQuery):
 @router.callback_query(F.data == "paid_wealth")
 async def paid_wealth_handler(callback: CallbackQuery):
     await callback.message.edit_text(
-        "&@#_ Премиум вкладка БОГАТСТВО\._\n"
+        "\&\@\#\_ Премиум вкладка БОГАТСТВО\._\n"
         "**Обратите внимание:** _тут будет только фанатская анимация, сделанная в blender, это не несёт какой\-то поучительный характер\._",
         reply_markup=wealth_kb(is_paid=True)
     )
+
 
 @router.callback_query(F.data == "paid_rappers")
 async def paid_rappers_handler(callback: CallbackQuery):
